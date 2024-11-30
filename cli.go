@@ -67,6 +67,8 @@ func handleActionsOnBill(bill *Bill) {
 	var prompt promptui.Select
 
 	for {
+		fmt.Println(productsCatalog)
+
 		var items []string
 
 		if len(bill.products) > 0 {

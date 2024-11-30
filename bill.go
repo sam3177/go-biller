@@ -5,14 +5,8 @@ import (
 	"strings"
 )
 
-type Product struct {
-	id        string
-	name      string
-	unitPrice float64
-}
-
 type BillProduct struct {
-	name     string
+	id       string
 	quantity int
 }
 
@@ -35,20 +29,25 @@ func NewBill(tableName string) *Bill {
 // methods:
 
 // addProduct
-func (bill *Bill) AddProduct(name string, quantity int) {
+func (bill *Bill) AddProduct(id string, quantity int) {
+	if !checkIfProductIsValid(id) {
+		fmt.Printf("Product with ID %v is not a valid product in the system.", id)
+
+		return
+	}
 	for i, value := range bill.products {
-		if value.name == name {
+		if value.id == id {
 			bill.products[i].quantity += quantity
 			return
 		}
 	}
-	bill.products = append(bill.products, BillProduct{name: name, quantity: quantity})
+	bill.products = append(bill.products, BillProduct{id: id, quantity: quantity})
 }
 
 // removeProduct
-func (bill *Bill) RemoveProduct(name string, quantity int) {
+func (bill *Bill) RemoveProduct(id string, quantity int) {
 	for i, value := range bill.products {
-		if value.name == name {
+		if value.id == id {
 			bill.products[i].quantity -= quantity
 			if bill.products[i].quantity <= 0 {
 				bill.products = append(bill.products[:i], bill.products[i+1:]...)
@@ -68,7 +67,8 @@ func (bill *Bill) calculateTotal() float64 {
 	var total float64 = 0
 
 	for _, value := range bill.products {
-		total += float64(value.quantity) * productsCatalog[value.name]
+		product, _ := getProductById(value.id)
+		total += float64(value.quantity) * product.unitPrice
 	}
 
 	return total
@@ -97,16 +97,18 @@ func (bill *Bill) formatBill() string {
 
 	fmt.Println()
 	for _, value := range bill.products {
-		formattedBill += fmt.Sprintf(value.name + "\n")
+		product, _ := getProductById(value.id)
+
+		formattedBill += fmt.Sprintf(product.name + "\n")
 
 		formattedQuantityTimesUnitPrice := fmt.Sprintf("%*s",
 			BILL_ROW_LENGTH/2,
-			fmt.Sprintf("%v X %0.2f", value.quantity, productsCatalog[value.name]),
+			fmt.Sprintf("%v X %0.2f", value.quantity, product.unitPrice),
 		)
 
 		formattedBill += formattedQuantityTimesUnitPrice
 
-		totalCost := fmt.Sprintf("%0.2f", float64(value.quantity)*productsCatalog[value.name])
+		totalCost := fmt.Sprintf("%0.2f", float64(value.quantity)*product.unitPrice)
 		formattedBill += fmt.Sprintf("%*v \n",
 			BILL_ROW_LENGTH/2,
 			totalCost,

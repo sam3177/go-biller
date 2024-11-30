@@ -1,7 +1,16 @@
 package main
 
-var productsCatalog map[string]float64 = map[string]float64{
-	"watter":  1,
-	"banana": 2,
-	"carrot": 0.5,
+import "github.com/google/uuid"
+
+var productsCatalog []Product = []Product{
+	{
+		id:        uuid.NewString(),
+		name:      "Banana",
+		unitPrice: 1,
+	},
+	{
+		id:        uuid.NewString(),
+		name:      "Apple",
+		unitPrice: 1.2,
+	},
 }
