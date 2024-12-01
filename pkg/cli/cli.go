@@ -46,34 +46,41 @@ func getBillItemFromInput(reader *bufio.Reader, action string) (string, int) {
 
 	i, _, _ := prompt.Run()
 
-	quantity := getValidIntFromInput(reader, fmt.Sprintf("Please provide the quantity of %v you want to %v: ", utils.ProductsCatalog[i].Name, action))
+	quantity := getValidIntFromInput(
+		reader,
+		fmt.Sprintf("Please provide the quantity of %v you want to %v: ", utils.ProductsCatalog[i].Name, action),
+		utils.GetValidNumberFromInputOptions{ShouldBePositive: true})
 
 	return utils.ProductsCatalog[i].Id, quantity
 }
 
-func getValidIntFromInput(reader *bufio.Reader, prompt string) int {
+func getValidIntFromInput(reader *bufio.Reader, prompt string, options utils.GetValidNumberFromInputOptions) int {
 	value, _ := getInput(reader, prompt)
 
 	//check if quantity is a int
 	intValue, error := strconv.ParseInt(value, 10, 0)
 	if error != nil {
 		fmt.Println("Error:", error)
-
-		return getValidIntFromInput(reader, prompt)
+		return getValidIntFromInput(reader, prompt, options)
+	} else if options.ShouldBePositive && intValue <= 0 {
+		fmt.Println("Error: You must enter a positive integer number")
+		return getValidIntFromInput(reader, prompt, options)
 	}
 
 	return int(intValue)
 }
 
-func getValidFloatFromInput(reader *bufio.Reader, prompt string) float64 {
+func getValidFloatFromInput(reader *bufio.Reader, prompt string, options utils.GetValidNumberFromInputOptions) float64 {
 	value, _ := getInput(reader, prompt)
 
 	//check if quantity is a float64
 	floatValue, error := strconv.ParseFloat(value, 64)
 	if error != nil {
 		fmt.Println("Error:", error)
-
-		return getValidFloatFromInput(reader, prompt)
+		return getValidFloatFromInput(reader, prompt, options)
+	} else if options.ShouldBePositive && floatValue <= 0 {
+		fmt.Println("Error: You must enter a positive decimal number")
+		return getValidFloatFromInput(reader, prompt, options)
 	}
 
 	return floatValue
@@ -82,7 +89,7 @@ func getValidFloatFromInput(reader *bufio.Reader, prompt string) float64 {
 func InitializeBillWithNumber() *bill.Bill {
 	reader := bufio.NewReader(os.Stdin)
 
-	tableName, _ := getInput(reader, "Please, type the table name:")
+	tableName, _ := getInput(reader, "Please, type the table name: ")
 
 	bill := bill.NewBill(tableName)
 
@@ -106,7 +113,6 @@ func HandleActionsOnBill(bill *bill.Bill) {
 			items = promptItemsWithRemoveOption
 		} else {
 			items = promptItems
-
 		}
 
 		prompt = promptui.Select{
@@ -133,7 +139,7 @@ func HandleActionsOnBill(bill *bill.Bill) {
 			fmt.Println(bill.Products)
 
 		case utils.BILL_ACTIONS["addTip"]:
-			tip := getValidFloatFromInput(reader, "Add the tip, please: ")
+			tip := getValidFloatFromInput(reader, "Add the tip, please: ", utils.GetValidNumberFromInputOptions{ShouldBePositive: true})
 			bill.SetTip(tip)
 			fmt.Println(bill)
 

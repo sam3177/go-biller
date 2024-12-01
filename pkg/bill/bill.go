@@ -45,6 +45,7 @@ func (bill *Bill) AddProduct(id string, quantity int) {
 			return
 		}
 	}
+
 	bill.Products = append(bill.Products, BillProduct{Id: id, Quantity: quantity})
 }
 
