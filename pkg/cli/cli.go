@@ -4,26 +4,14 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"strconv"
-	"strings"
 
 	"github.com/manifoldco/promptui"
 
 	"biller/pkg/bill"
+	"biller/pkg/inputHandler"
 	"biller/pkg/productRepository"
 	"biller/pkg/utils"
 )
-
-func getInput(reader *bufio.Reader, prompt string) (string, error) {
-	fmt.Print(prompt)
-	value, error := reader.ReadString('\n')
-
-	if error != nil {
-		fmt.Println("Error:", error)
-	}
-
-	return strings.TrimSpace(value), error
-}
 
 func getBillItemFromInput(reader *bufio.Reader, action string) (string, int) {
 	var promptVariant string
@@ -47,7 +35,7 @@ func getBillItemFromInput(reader *bufio.Reader, action string) (string, int) {
 
 	i, _, _ := prompt.Run()
 
-	quantity := getValidIntFromInput(
+	quantity := inputHandler.GetValidIntFromInput(
 		reader,
 		fmt.Sprintf("Please provide the quantity of %v you want to %v: ", utils.ProductsCatalog[i].Name, action),
 		utils.GetValidNumberFromInputOptions{ShouldBePositive: true})
@@ -55,43 +43,12 @@ func getBillItemFromInput(reader *bufio.Reader, action string) (string, int) {
 	return utils.ProductsCatalog[i].Id, quantity
 }
 
-func getValidIntFromInput(reader *bufio.Reader, prompt string, options utils.GetValidNumberFromInputOptions) int {
-	value, _ := getInput(reader, prompt)
-
-	//check if quantity is a int
-	intValue, error := strconv.ParseInt(value, 10, 0)
-	if error != nil {
-		fmt.Println("Error:", error)
-		return getValidIntFromInput(reader, prompt, options)
-	} else if options.ShouldBePositive && intValue <= 0 {
-		fmt.Println("Error: You must enter a positive integer number")
-		return getValidIntFromInput(reader, prompt, options)
-	}
-
-	return int(intValue)
-}
-
-func getValidFloatFromInput(reader *bufio.Reader, prompt string, options utils.GetValidNumberFromInputOptions) float64 {
-	value, _ := getInput(reader, prompt)
-
-	//check if quantity is a float64
-	floatValue, error := strconv.ParseFloat(value, 64)
-	if error != nil {
-		fmt.Println("Error:", error)
-		return getValidFloatFromInput(reader, prompt, options)
-	} else if options.ShouldBePositive && floatValue <= 0 {
-		fmt.Println("Error: You must enter a positive decimal number")
-		return getValidFloatFromInput(reader, prompt, options)
-	}
-
-	return floatValue
-}
-
-func InitializeBillWithNumber() *bill.Bill {
+func InitializeBill() *bill.Bill {
 	reader := bufio.NewReader(os.Stdin)
 
-	tableName, _ := getInput(reader, "Please, type the table name: ")
+	tableName, _ := inputHandler.GetInput(reader, "Please, type the table name: ")
 
+	// TODO: refactor here
 	productRepo := productRepository.NewProductRepository(utils.ProductsCatalog)
 
 	bill := bill.NewBill(tableName, productRepo)
@@ -99,63 +56,66 @@ func InitializeBillWithNumber() *bill.Bill {
 	return bill
 }
 
+func selectAction(actions []string, hasProducts bool) (string, error) {
+	if hasProducts {
+		actions = append(actions[0:1], append([]string{utils.BILL_ACTIONS["removeProduct"]}, actions[1:]...)...)
+
+	}
+
+	prompt := promptui.Select{
+		Label: "Select an Option",
+		Items: actions,
+	}
+
+	_, action, error := prompt.Run()
+
+	return action, error
+
+}
+
 func HandleActionsOnBill(bill *bill.Bill) {
 	reader := bufio.NewReader(os.Stdin)
 
 	promptItems := []string{utils.BILL_ACTIONS["addProduct"], utils.BILL_ACTIONS["addTip"], utils.BILL_ACTIONS["printBill"], utils.BILL_ACTIONS["saveAndExit"], utils.BILL_ACTIONS["exit"]}
-	promptItemsWithRemoveOption := append(promptItems[0:1], append([]string{utils.BILL_ACTIONS["removeProduct"]}, promptItems[1:]...)...)
-
-	var prompt promptui.Select
 
 	for {
-		fmt.Println(utils.ProductsCatalog)
+		action, error := selectAction(promptItems, len(bill.Products) > 0)
 
-		var items []string
-
-		if len(bill.Products) > 0 {
-			items = promptItemsWithRemoveOption
-		} else {
-			items = promptItems
-		}
-
-		prompt = promptui.Select{
-			Label: "Select an Option",
-			Items: items,
-		}
-
-		_, action, err := prompt.Run()
-
-		if err != nil {
-			fmt.Printf("Prompt failed %v\n", err)
+		if error != nil {
+			fmt.Printf("Prompt failed %v\n", error)
 			return
 		}
 
-		switch action {
-		case utils.BILL_ACTIONS["addProduct"]:
-			name, quantity := getBillItemFromInput(reader, "add")
-			bill.AddProduct(name, quantity)
-			fmt.Println(bill.Products)
+		executeAction(bill, reader, action)
+	}
+}
 
-		case utils.BILL_ACTIONS["removeProduct"]:
-			name, quantity := getBillItemFromInput(reader, "remove")
-			bill.RemoveProduct(name, quantity)
-			fmt.Println(bill.Products)
+func executeAction(bill *bill.Bill, reader *bufio.Reader, action string) {
+	switch action {
+	case utils.BILL_ACTIONS["addProduct"]:
+		name, quantity := getBillItemFromInput(reader, "add")
+		bill.AddProduct(name, quantity)
+		fmt.Println(bill.Products)
 
-		case utils.BILL_ACTIONS["addTip"]:
-			tip := getValidFloatFromInput(reader, "Add the tip, please: ", utils.GetValidNumberFromInputOptions{ShouldBePositive: true})
-			bill.SetTip(tip)
-			fmt.Println(bill)
+	case utils.BILL_ACTIONS["removeProduct"]:
+		name, quantity := getBillItemFromInput(reader, "remove")
+		bill.RemoveProduct(name, quantity)
+		fmt.Println(bill.Products)
 
-		case utils.BILL_ACTIONS["printBill"]:
-			bill.PrintBill()
+	case utils.BILL_ACTIONS["addTip"]:
+		tip := inputHandler.GetValidFloatFromInput(reader, "Add the tip, please: ", utils.GetValidNumberFromInputOptions{ShouldBePositive: true})
+		bill.SetTip(tip)
+		fmt.Println(bill)
 
-		case utils.BILL_ACTIONS["saveAndExit"]:
-			fileName := bill.SaveBill()
-			utils.OpenFileInVsCode(utils.BILLS_DIR + "/" + fileName)
-			os.Exit(0)
+	case utils.BILL_ACTIONS["printBill"]:
+		bill.PrintBill()
 
-		case utils.BILL_ACTIONS["exit"]:
-			os.Exit(0)
-		}
+	case utils.BILL_ACTIONS["saveAndExit"]:
+		fileName := bill.SaveBill()
+		utils.OpenFileInVsCode(utils.BILLS_DIR + "/" + fileName)
+		os.Exit(0)
+
+	case utils.BILL_ACTIONS["exit"]:
+		os.Exit(0)
 	}
 }
