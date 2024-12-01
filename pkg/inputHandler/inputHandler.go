@@ -22,7 +22,6 @@ func GetInput(reader *bufio.Reader, prompt string) (string, error) {
 func GetValidIntFromInput(reader *bufio.Reader, prompt string, options utils.GetValidNumberFromInputOptions) int {
 	value, _ := GetInput(reader, prompt)
 
-	//check if quantity is a int
 	intValue, error := strconv.ParseInt(value, 10, 0)
 	if error != nil {
 		fmt.Println("Error:", error)
@@ -38,7 +37,6 @@ func GetValidIntFromInput(reader *bufio.Reader, prompt string, options utils.Get
 func GetValidFloatFromInput(reader *bufio.Reader, prompt string, options utils.GetValidNumberFromInputOptions) float64 {
 	value, _ := GetInput(reader, prompt)
 
-	//check if quantity is a float64
 	floatValue, error := strconv.ParseFloat(value, 64)
 	if error != nil {
 		fmt.Println("Error:", error)
