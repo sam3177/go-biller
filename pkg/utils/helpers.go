@@ -1,15 +1,15 @@
 package utils
 
 import (
-	productsRepository "biller/pkg/productsRepo"
+	productRepository "biller/pkg/productsRepo"
 	"fmt"
 	"os"
 	"os/exec"
 	"slices"
 )
 
-func GetProductById(products []productsRepository.Product, id string) (*productsRepository.Product, error) {
-	index := slices.IndexFunc(products, func(product productsRepository.Product) bool {
+func GetProductById(products []productRepository.Product, id string) (*productRepository.Product, error) {
+	index := slices.IndexFunc(products, func(product productRepository.Product) bool {
 		return product.Id == id
 	})
 
@@ -20,8 +20,8 @@ func GetProductById(products []productsRepository.Product, id string) (*products
 	return &products[index], nil
 }
 
-func CheckIfProductIsValid(products []productsRepository.Product, id string) bool {
-	index := slices.IndexFunc(products, func(product productsRepository.Product) bool {
+func CheckIfProductIsValid(products []productRepository.Product, id string) bool {
+	index := slices.IndexFunc(products, func(product productRepository.Product) bool {
 		return product.Id == id
 	})
 

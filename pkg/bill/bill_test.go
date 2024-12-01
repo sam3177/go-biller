@@ -31,7 +31,7 @@ package bill
 
 // 	bill := &Bill{
 // 		TableName: "34",
-// 		Products:  []BillProduct{},
+// 		Products:  []BillItem{},
 // 	}
 
 // 	// Test adding a valid product

@@ -10,21 +10,21 @@ import (
 	"biller/pkg/utils"
 )
 
-type BillProduct struct {
+type BillItem struct {
 	Id       string
 	Quantity int
 }
 
 type Bill struct {
 	TableName string
-	Products  []BillProduct
+	Products  []BillItem
 	Tip       float64
 }
 
 func NewBill(tableName string) *Bill {
 	return &Bill{
 		TableName: tableName,
-		Products:  []BillProduct{},
+		Products:  []BillItem{},
 		Tip:       0,
 	}
 }
@@ -46,7 +46,7 @@ func (bill *Bill) AddProduct(id string, quantity int) {
 		}
 	}
 
-	bill.Products = append(bill.Products, BillProduct{Id: id, Quantity: quantity})
+	bill.Products = append(bill.Products, BillItem{Id: id, Quantity: quantity})
 }
 
 // removeProduct

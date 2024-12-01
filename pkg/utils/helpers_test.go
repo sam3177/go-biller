@@ -1,11 +1,11 @@
 package utils
 
 import (
-	productsRepository "biller/pkg/productsRepo"
+	productRepository "biller/pkg/productsRepo"
 	"testing"
 )
 
-var products = []productsRepository.Product{
+var products = []productRepository.Product{
 	{Id: "1", Name: "one"},
 	{Id: "2", Name: "two"},
 	{Id: "3", Name: "three"},
@@ -15,7 +15,7 @@ func TestGetProductById(t *testing.T) {
 
 	testCases := []struct {
 		id          string
-		expected    *productsRepository.Product
+		expected    *productRepository.Product
 		expectError bool
 	}{
 		{"1", &products[0], false},
