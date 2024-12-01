@@ -7,6 +7,7 @@ import (
 
 	"github.com/google/uuid"
 
+	"biller/pkg/productRepository"
 	"biller/pkg/utils"
 )
 
@@ -16,16 +17,18 @@ type BillItem struct {
 }
 
 type Bill struct {
-	TableName string
-	Products  []BillItem
-	Tip       float64
+	TableName   string
+	Products    []BillItem
+	Tip         float64
+	ProductRepo productRepository.ProductRepositoryInterface
 }
 
-func NewBill(tableName string) *Bill {
+func NewBill(tableName string, productRepo *productRepository.ProductRepository) *Bill {
 	return &Bill{
-		TableName: tableName,
-		Products:  []BillItem{},
-		Tip:       0,
+		TableName:   tableName,
+		Products:    []BillItem{},
+		Tip:         0,
+		ProductRepo: productRepo,
 	}
 }
 
@@ -33,7 +36,7 @@ func NewBill(tableName string) *Bill {
 
 // addProduct
 func (bill *Bill) AddProduct(id string, quantity int) {
-	if !utils.CheckIfProductIsValid(utils.ProductsCatalog, id) {
+	if !bill.ProductRepo.IsProductValid(id) {
 		fmt.Printf("Product with ID %v is not a valid product in the system.", id)
 
 		return
@@ -51,7 +54,7 @@ func (bill *Bill) AddProduct(id string, quantity int) {
 
 // removeProduct
 func (bill *Bill) RemoveProduct(id string, quantity int) {
-	if !utils.CheckIfProductIsValid(utils.ProductsCatalog, id) {
+	if !bill.ProductRepo.IsProductValid(id) {
 		fmt.Printf("Product with ID %v is not a valid product in the system.", id)
 
 		return
@@ -78,7 +81,7 @@ func (bill *Bill) calculateTotal() float64 {
 	var total float64 = 0
 
 	for _, value := range bill.Products {
-		product, _ := utils.GetProductById(utils.ProductsCatalog, value.Id)
+		product, _ := bill.ProductRepo.GetProductById(value.Id)
 		total += float64(value.Quantity) * product.UnitPrice
 	}
 
@@ -107,7 +110,7 @@ func (bill *Bill) formatBill() string {
 	formattedBill += dottedLine
 
 	for _, value := range bill.Products {
-		product, _ := utils.GetProductById(utils.ProductsCatalog, value.Id)
+		product, _ := bill.ProductRepo.GetProductById(value.Id)
 
 		formattedBill += fmt.Sprintf(product.Name + "\n")
 

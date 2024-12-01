@@ -1,7 +1,7 @@
 package utils
 
 import (
-	productRepository "biller/pkg/productsRepo"
+	"biller/pkg/productRepository"
 
 	"github.com/google/uuid"
 )

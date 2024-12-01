@@ -12,7 +12,7 @@ package bill
 // 	mock.Mock
 // }
 
-// func (m *MockUtils) CheckIfProductIsValid(products []utils.Product, id string) bool {
+// func (m *MockUtils) IsProductValid(products []utils.Product, id string) bool {
 // 	args := m.Called(products, id)
 // 	return args.Bool(0)
 // }
@@ -25,9 +25,9 @@ package bill
 // 		{Id: "2", Name: "Product 2"},
 // 	}
 
-// 	mockUtils.On("CheckIfProductIsValid", productsCatalog, "1").Return(true)
-// 	mockUtils.On("CheckIfProductIsValid", productsCatalog, "2").Return(true)
-// 	mockUtils.On("CheckIfProductIsValid", productsCatalog, "3").Return(false)
+// 	mockUtils.On("IsProductValid", productsCatalog, "1").Return(true)
+// 	mockUtils.On("IsProductValid", productsCatalog, "2").Return(true)
+// 	mockUtils.On("IsProductValid", productsCatalog, "3").Return(false)
 
 // 	bill := &Bill{
 // 		TableName: "34",

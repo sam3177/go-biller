@@ -10,6 +10,7 @@ import (
 	"github.com/manifoldco/promptui"
 
 	"biller/pkg/bill"
+	"biller/pkg/productRepository"
 	"biller/pkg/utils"
 )
 
@@ -91,7 +92,9 @@ func InitializeBillWithNumber() *bill.Bill {
 
 	tableName, _ := getInput(reader, "Please, type the table name: ")
 
-	bill := bill.NewBill(tableName)
+	productRepo := productRepository.NewProductRepository(utils.ProductsCatalog)
+
+	bill := bill.NewBill(tableName, productRepo)
 
 	return bill
 }
