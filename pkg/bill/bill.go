@@ -8,7 +8,6 @@ import (
 	"github.com/google/uuid"
 
 	"biller/pkg/productRepository"
-	"biller/pkg/utils"
 )
 
 type BillItem struct {
@@ -16,19 +15,30 @@ type BillItem struct {
 	Quantity int
 }
 
+type BillConfig struct {
+	BillsDir      string
+	BillRowLength int
+}
+
 type Bill struct {
 	tableName   string
 	products    []BillItem
 	tip         float64
 	ProductRepo productRepository.ProductRepositoryInterface
+	BillConfig
 }
 
-func NewBill(tableName string, productRepo productRepository.ProductRepositoryInterface) *Bill {
+func NewBill(
+	tableName string,
+	productRepo productRepository.ProductRepositoryInterface,
+	config BillConfig,
+) *Bill {
 	return &Bill{
 		tableName:   tableName,
 		products:    []BillItem{},
 		tip:         0,
 		ProductRepo: productRepo,
+		BillConfig:  config,
 	}
 }
 
@@ -92,7 +102,7 @@ func (bill *Bill) formatBill() string {
 
 		formattedAmount := fmt.Sprintf("%0.2f", amount)
 		newLine += fmt.Sprintf("%*v \n",
-			utils.BILL_ROW_LENGTH-len(name),
+			bill.BillRowLength-len(name),
 			formattedAmount,
 		)
 
@@ -100,8 +110,8 @@ func (bill *Bill) formatBill() string {
 	}
 
 	billTitle := "----Bill----"
-	dottedLine := strings.Repeat("-", utils.BILL_ROW_LENGTH) + "\n"
-	formattedBill := fmt.Sprintf("%*s \n", (utils.BILL_ROW_LENGTH+len(billTitle))/2, billTitle)
+	dottedLine := strings.Repeat("-", bill.BillRowLength) + "\n"
+	formattedBill := fmt.Sprintf("%*s \n", (bill.BillRowLength+len(billTitle))/2, billTitle)
 
 	formattedBill += fmt.Sprintf("Table name: %v \n", bill.tableName)
 	formattedBill += dottedLine
@@ -112,7 +122,7 @@ func (bill *Bill) formatBill() string {
 		formattedBill += fmt.Sprintf(product.Name + "\n")
 
 		formattedQuantityTimesUnitPrice := fmt.Sprintf("%*s",
-			utils.BILL_ROW_LENGTH/2,
+			bill.BillRowLength/2,
 			fmt.Sprintf("%v X %0.2f", value.Quantity, product.UnitPrice),
 		)
 
@@ -120,7 +130,7 @@ func (bill *Bill) formatBill() string {
 
 		totalCost := fmt.Sprintf("%0.2f", float64(value.Quantity)*product.UnitPrice)
 		formattedBill += fmt.Sprintf("%*v \n",
-			utils.BILL_ROW_LENGTH/2,
+			bill.BillRowLength/2,
 			totalCost,
 		)
 
@@ -145,7 +155,7 @@ func (bill *Bill) SaveBill() string {
 
 	fileName := "table_" + bill.tableName + "_" + uuid.NewString() + ".txt"
 
-	error := os.WriteFile(utils.BILLS_DIR+"/"+fileName, data, 0644)
+	error := os.WriteFile(bill.BillsDir+"/"+fileName, data, 0644)
 
 	if error != nil {
 		fmt.Println("Error", error)

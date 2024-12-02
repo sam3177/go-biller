@@ -53,7 +53,13 @@ func InitializeBill(productRepo productRepository.ProductRepositoryInterface) *b
 
 	// TODO: refactor here
 
-	bill := bill.NewBill(tableName, productRepo)
+	bill := bill.NewBill(
+		tableName,
+		productRepo,
+		bill.BillConfig{
+			BillsDir:      utils.BILLS_DIR,
+			BillRowLength: utils.BILL_ROW_LENGTH,
+		})
 
 	return bill
 }
@@ -61,7 +67,6 @@ func InitializeBill(productRepo productRepository.ProductRepositoryInterface) *b
 func selectAction(actions []string, hasProducts bool) (string, error) {
 	if hasProducts {
 		actions = append(actions[0:1], append([]string{utils.BILL_ACTIONS["removeProduct"]}, actions[1:]...)...)
-
 	}
 
 	prompt := promptui.Select{

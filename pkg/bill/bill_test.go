@@ -16,10 +16,14 @@ var testProductsRepo = productRepository.NewLocalProductRepository(
 		{Id: "3", Name: "Product 3", UnitPrice: 3},
 	},
 )
+var testBillConfig = BillConfig{
+	BillsDir:      utils.BILLS_DIR,
+	BillRowLength: utils.BILL_ROW_LENGTH,
+}
 
 func TestAddProduct(t *testing.T) {
 
-	bill := NewBill("Table 1", testProductsRepo)
+	bill := NewBill("Table 1", testProductsRepo, testBillConfig)
 
 	// Test adding a valid product
 	bill.AddProduct("1", 2)
@@ -45,7 +49,7 @@ func TestAddProduct(t *testing.T) {
 }
 
 func TestRemoveProduct(t *testing.T) {
-	bill := NewBill("Table 2", testProductsRepo)
+	bill := NewBill("Table 2", testProductsRepo, testBillConfig)
 
 	// Add 2 products to the bill
 
@@ -76,7 +80,7 @@ func TestRemoveProduct(t *testing.T) {
 }
 
 func TestCalculateTotal(t *testing.T) {
-	bill := NewBill("Table 1", testProductsRepo)
+	bill := NewBill("Table 1", testProductsRepo, testBillConfig)
 
 	bill.AddProduct("1", 4)
 	bill.AddProduct("2", 3)
@@ -90,7 +94,7 @@ func TestCalculateTotal(t *testing.T) {
 }
 
 func TestFormatBill(t *testing.T) {
-	bill := NewBill("Table 1", testProductsRepo)
+	bill := NewBill("Table 1", testProductsRepo, testBillConfig)
 
 	// Add some products to the bill
 	bill.AddProduct("1", 4)
@@ -125,7 +129,7 @@ Total                              44.60
 }
 
 func TestSaveBill(t *testing.T) {
-	bill := NewBill("Table 1", testProductsRepo)
+	bill := NewBill("Table 1", testProductsRepo, testBillConfig)
 
 	//make bills folder and cleanup at the end with defer
 	os.Mkdir("bills", 0755)
