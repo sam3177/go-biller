@@ -23,7 +23,7 @@ type Bill struct {
 	ProductRepo productRepository.ProductRepositoryInterface
 }
 
-func NewBill(tableName string, productRepo *productRepository.ProductRepository) *Bill {
+func NewBill(tableName string, productRepo productRepository.ProductRepositoryInterface) *Bill {
 	return &Bill{
 		tableName:   tableName,
 		products:    []BillItem{},

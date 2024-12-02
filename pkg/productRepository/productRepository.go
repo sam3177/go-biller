@@ -12,23 +12,24 @@ type Product struct {
 }
 
 type ProductRepositoryInterface interface {
-	GetProductById(id string) (*Product, error) // Fetch product details by ID
-	IsProductValid(id string) bool              // Check if a product is valid
-	GetProducts() []Product                     // Optional: List all products
+	GetProducts() []Product
+	GetProductById(id string) (*Product, error)
+	IsProductValid(id string) bool
 }
 
-type ProductRepository struct {
+type LocalProductRepository struct {
+	products []Product
 }
 
-func NewProductRepository() *ProductRepository {
-	return &ProductRepository{}
+func NewLocalProductRepository(products []Product) *LocalProductRepository {
+	return &LocalProductRepository{products: products}
 }
 
-func (repo *ProductRepository) GetProducts() []Product {
-	return ProductsCatalog
+func (repo *LocalProductRepository) GetProducts() []Product {
+	return repo.products
 }
 
-func (repo *ProductRepository) GetProductById(id string) (*Product, error) {
+func (repo *LocalProductRepository) GetProductById(id string) (*Product, error) {
 	index := slices.IndexFunc(repo.GetProducts(), func(product Product) bool {
 		return product.Id == id
 	})
@@ -40,7 +41,7 @@ func (repo *ProductRepository) GetProductById(id string) (*Product, error) {
 	return &repo.GetProducts()[index], nil
 }
 
-func (repo *ProductRepository) IsProductValid(id string) bool {
+func (repo *LocalProductRepository) IsProductValid(id string) bool {
 	index := slices.IndexFunc(repo.GetProducts(), func(product Product) bool {
 		return product.Id == id
 	})

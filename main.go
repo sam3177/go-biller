@@ -6,7 +6,7 @@ import (
 )
 
 func main() {
-	productRepo := productRepository.NewProductRepository()
+	productRepo := productRepository.NewLocalProductRepository(productRepository.ProductsCatalog)
 
 	bill := cli.InitializeBill(productRepo)
 

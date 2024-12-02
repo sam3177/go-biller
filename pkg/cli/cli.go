@@ -14,7 +14,7 @@ import (
 )
 
 // refactor here
-func getBillItemFromInput(reader *bufio.Reader, productRepo *productRepository.ProductRepository, action string) (string, int) {
+func getBillItemFromInput(reader *bufio.Reader, productRepo productRepository.ProductRepositoryInterface, action string) (string, int) {
 	var promptVariant string
 	if action == "add" {
 		promptVariant = "add to"
@@ -46,7 +46,7 @@ func getBillItemFromInput(reader *bufio.Reader, productRepo *productRepository.P
 	return products[i].Id, quantity
 }
 
-func InitializeBill(productRepo *productRepository.ProductRepository) *bill.Bill {
+func InitializeBill(productRepo productRepository.ProductRepositoryInterface) *bill.Bill {
 	reader := bufio.NewReader(os.Stdin)
 
 	tableName, _ := inputHandler.GetInput(reader, "Please, type the table name: ")
@@ -75,7 +75,7 @@ func selectAction(actions []string, hasProducts bool) (string, error) {
 
 }
 
-func HandleActionsOnBill(bill *bill.Bill, productRepo *productRepository.ProductRepository) {
+func HandleActionsOnBill(bill *bill.Bill, productRepo productRepository.ProductRepositoryInterface) {
 	reader := bufio.NewReader(os.Stdin)
 
 	promptItems := []string{utils.BILL_ACTIONS["addProduct"], utils.BILL_ACTIONS["addTip"], utils.BILL_ACTIONS["printBill"], utils.BILL_ACTIONS["saveAndExit"], utils.BILL_ACTIONS["exit"]}
@@ -92,7 +92,7 @@ func HandleActionsOnBill(bill *bill.Bill, productRepo *productRepository.Product
 	}
 }
 
-func executeAction(bill *bill.Bill, productRepo *productRepository.ProductRepository, reader *bufio.Reader, action string) {
+func executeAction(bill *bill.Bill, productRepo productRepository.ProductRepositoryInterface, reader *bufio.Reader, action string) {
 	switch action {
 	case utils.BILL_ACTIONS["addProduct"]:
 		name, quantity := getBillItemFromInput(reader, productRepo, "add")

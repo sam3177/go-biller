@@ -2,46 +2,19 @@ package bill
 
 import (
 	"biller/pkg/productRepository"
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
-type MockProductRepository struct {
-	products []productRepository.Product
-}
-
-func (m *MockProductRepository) GetProducts() []productRepository.Product {
-	return m.products
-}
-
-func (m *MockProductRepository) GetProductById(id string) (*productRepository.Product, error) {
-	for _, product := range m.products {
-		if product.Id == id {
-			return &product, nil
-		}
-	}
-	return nil, fmt.Errorf("product with ID %v not found", id)
-}
-
-func (m *MockProductRepository) IsProductValid(id string) bool {
-	for _, product := range m.products {
-		if product.Id == id {
-			return true
-		}
-	}
-	return false
-}
-
 func TestAddProduct(t *testing.T) {
 
-	testProductsRepo := &MockProductRepository{
-		products: []productRepository.Product{
+	testProductsRepo := productRepository.NewLocalProductRepository(
+		[]productRepository.Product{
 			{Id: "1", Name: "Product 1"},
 			{Id: "2", Name: "Product 2"},
 		},
-	}
+	)
 
 	bill := &Bill{
 		tableName:   "34",
