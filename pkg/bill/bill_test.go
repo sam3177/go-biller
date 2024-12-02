@@ -2,25 +2,24 @@ package bill
 
 import (
 	"biller/pkg/productRepository"
+	"biller/pkg/utils"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
+var testProductsRepo = productRepository.NewLocalProductRepository(
+	[]productRepository.Product{
+		{Id: "1", Name: "Product 1", UnitPrice: 1},
+		{Id: "2", Name: "Product 2", UnitPrice: 2},
+		{Id: "3", Name: "Product 3", UnitPrice: 3},
+	},
+)
+
 func TestAddProduct(t *testing.T) {
 
-	testProductsRepo := productRepository.NewLocalProductRepository(
-		[]productRepository.Product{
-			{Id: "1", Name: "Product 1"},
-			{Id: "2", Name: "Product 2"},
-		},
-	)
-
-	bill := &Bill{
-		tableName:   "34",
-		products:    []BillItem{},
-		ProductRepo: testProductsRepo,
-	}
+	bill := NewBill("Table 1", testProductsRepo)
 
 	// Test adding a valid product
 	bill.AddProduct("1", 2)
@@ -41,6 +40,104 @@ func TestAddProduct(t *testing.T) {
 	assert.Equal(t, 1, bill.GetProducts()[1].Quantity)
 
 	// Test adding an invalid product
-	bill.AddProduct("3", 1)
+	bill.AddProduct("4", 1)
 	assert.Equal(t, 2, len(bill.GetProducts())) // No change in length
+}
+
+func TestRemoveProduct(t *testing.T) {
+	bill := NewBill("Table 2", testProductsRepo)
+
+	// Add 2 products to the bill
+
+	bill.AddProduct("1", 4)
+	bill.AddProduct("2", 45)
+	bill.AddProduct("3", 7)
+
+	// Test removing a valid product with quantity less than existing
+	bill.RemoveProduct("1", 2)
+	assert.Equal(t, 3, len(bill.GetProducts()))
+	assert.Equal(t, 2, bill.GetProducts()[0].Quantity)
+
+	// Test removing a valid product with quantity equal to existing
+	bill.RemoveProduct("2", 45)
+	assert.Equal(t, 2, len(bill.GetProducts()))
+
+	// Test removing a valid product with quantity more than existing
+	bill.RemoveProduct("3", 10)
+	assert.Equal(t, 1, len(bill.GetProducts()))
+
+	// Test removing an invalid product
+	bill.RemoveProduct("4", 1)
+	assert.Equal(t, 1, len(bill.GetProducts())) // No change in length
+
+	// Test removing a valid product that does not exist in the bill
+	bill.RemoveProduct("2", 1)
+	assert.Equal(t, 1, len(bill.GetProducts())) // No change in length
+}
+
+func TestCalculateTotal(t *testing.T) {
+	bill := NewBill("Table 1", testProductsRepo)
+
+	bill.AddProduct("1", 4)
+	bill.AddProduct("2", 3)
+	bill.AddProduct("3", 1)
+
+	// Calculate the total
+	total := bill.calculateTotal()
+
+	// Assert the expected total
+	assert.Equal(t, 13.0, total)
+}
+
+func TestFormatBill(t *testing.T) {
+	bill := NewBill("Table 1", testProductsRepo)
+
+	// Add some products to the bill
+	bill.AddProduct("1", 4)
+	bill.AddProduct("2", 3)
+
+	// Set the tip
+	bill.SetTip(34.6)
+
+	// Format the bill
+	formattedBill := bill.formatBill()
+
+	expectedText := `              ----Bill---- 
+Table name: Table 1 
+----------------------------------------
+Product 1
+            4 X 1.00                4.00 
+Product 2
+            3 X 2.00                6.00 
+----------------------------------------
+
+Subtotal                           10.00 
+
+Tip                                34.60 
+----------------------------------------
+
+Total                              44.60 
+
+`
+
+	// Assert the expected formatted bill
+	assert.Equal(t, expectedText, formattedBill)
+}
+
+func TestSaveBill(t *testing.T) {
+	bill := NewBill("Table 1", testProductsRepo)
+
+	//make bills folder and cleanup at the end with defer
+	os.Mkdir("bills", 0755)
+	defer os.RemoveAll(utils.BILLS_DIR)
+
+	fileName := bill.SaveBill()
+
+	file, error := os.Open(utils.BILLS_DIR + "/" + fileName)
+
+	if error != nil {
+		t.Errorf("file not found")
+	}
+
+	defer file.Close()
 }
