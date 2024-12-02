@@ -1,8 +1,14 @@
 package main
 
-import "biller/pkg/cli"
+import (
+	"biller/pkg/cli"
+	"biller/pkg/productRepository"
+)
 
 func main() {
-	bill := cli.InitializeBill()
-	cli.HandleActionsOnBill(bill)
+	productRepo := productRepository.NewProductRepository()
+
+	bill := cli.InitializeBill(productRepo)
+
+	cli.HandleActionsOnBill(bill, productRepo)
 }

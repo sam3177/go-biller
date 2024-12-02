@@ -9,12 +9,7 @@ import (
 
 func TestAddProduct(t *testing.T) {
 
-	productsCatalog := []productRepository.Product{
-		{Id: "1", Name: "Product 1"},
-		{Id: "2", Name: "Product 2"},
-	}
-
-	productRepo := productRepository.NewProductRepository(productsCatalog)
+	productRepo := productRepository.NewProductRepository()
 
 	bill := &Bill{
 		tableName:   "34",

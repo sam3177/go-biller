@@ -14,7 +14,7 @@ import (
 )
 
 // refactor here
-func getBillItemFromInput(reader *bufio.Reader, action string) (string, int) {
+func getBillItemFromInput(reader *bufio.Reader, productRepo *productRepository.ProductRepository, action string) (string, int) {
 	var promptVariant string
 	if action == "add" {
 		promptVariant = "add to"
@@ -22,11 +22,13 @@ func getBillItemFromInput(reader *bufio.Reader, action string) (string, int) {
 		promptVariant = "remove from"
 	}
 
+	products := productRepo.GetProducts()
+
 	prompt := promptui.Select{
 		Label: fmt.Sprintf("Please type in the product you want to %v the bill: ", promptVariant),
 		Items: func() []string {
 			var names []string
-			for _, product := range utils.ProductsCatalog {
+			for _, product := range products {
 				names = append(names, product.Name)
 			}
 
@@ -38,19 +40,18 @@ func getBillItemFromInput(reader *bufio.Reader, action string) (string, int) {
 
 	quantity := inputHandler.GetValidIntFromInput(
 		reader,
-		fmt.Sprintf("Please provide the quantity of %v you want to %v: ", utils.ProductsCatalog[i].Name, action),
+		fmt.Sprintf("Please provide the quantity of %v you want to %v: ", products[i].Name, action),
 		utils.GetValidNumberFromInputOptions{ShouldBePositive: true})
 
-	return utils.ProductsCatalog[i].Id, quantity
+	return products[i].Id, quantity
 }
 
-func InitializeBill() *bill.Bill {
+func InitializeBill(productRepo *productRepository.ProductRepository) *bill.Bill {
 	reader := bufio.NewReader(os.Stdin)
 
 	tableName, _ := inputHandler.GetInput(reader, "Please, type the table name: ")
 
 	// TODO: refactor here
-	productRepo := productRepository.NewProductRepository(utils.ProductsCatalog)
 
 	bill := bill.NewBill(tableName, productRepo)
 
@@ -74,7 +75,7 @@ func selectAction(actions []string, hasProducts bool) (string, error) {
 
 }
 
-func HandleActionsOnBill(bill *bill.Bill) {
+func HandleActionsOnBill(bill *bill.Bill, productRepo *productRepository.ProductRepository) {
 	reader := bufio.NewReader(os.Stdin)
 
 	promptItems := []string{utils.BILL_ACTIONS["addProduct"], utils.BILL_ACTIONS["addTip"], utils.BILL_ACTIONS["printBill"], utils.BILL_ACTIONS["saveAndExit"], utils.BILL_ACTIONS["exit"]}
@@ -87,19 +88,19 @@ func HandleActionsOnBill(bill *bill.Bill) {
 			return
 		}
 
-		executeAction(bill, reader, action)
+		executeAction(bill, productRepo, reader, action)
 	}
 }
 
-func executeAction(bill *bill.Bill, reader *bufio.Reader, action string) {
+func executeAction(bill *bill.Bill, productRepo *productRepository.ProductRepository, reader *bufio.Reader, action string) {
 	switch action {
 	case utils.BILL_ACTIONS["addProduct"]:
-		name, quantity := getBillItemFromInput(reader, "add")
+		name, quantity := getBillItemFromInput(reader, productRepo, "add")
 		bill.AddProduct(name, quantity)
 		fmt.Println(bill.GetProducts())
 
 	case utils.BILL_ACTIONS["removeProduct"]:
-		name, quantity := getBillItemFromInput(reader, "remove")
+		name, quantity := getBillItemFromInput(reader, productRepo, "remove")
 		bill.RemoveProduct(name, quantity)
 		fmt.Println(bill.GetProducts())
 

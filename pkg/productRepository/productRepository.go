@@ -14,21 +14,22 @@ type Product struct {
 type ProductRepositoryInterface interface {
 	GetProductById(id string) (*Product, error) // Fetch product details by ID
 	IsProductValid(id string) bool              // Check if a product is valid
-	// ListAllProducts() []Product                 // Optional: List all products
+	GetProducts() []Product                     // Optional: List all products
 }
 
 type ProductRepository struct {
-	items []Product
 }
 
-func NewProductRepository(items []Product) *ProductRepository {
-	return &ProductRepository{
-		items: items,
-	}
+func NewProductRepository() *ProductRepository {
+	return &ProductRepository{}
+}
+
+func (repo *ProductRepository) GetProducts() []Product {
+	return ProductsCatalog
 }
 
 func (repo *ProductRepository) GetProductById(id string) (*Product, error) {
-	index := slices.IndexFunc(repo.items, func(product Product) bool {
+	index := slices.IndexFunc(repo.GetProducts(), func(product Product) bool {
 		return product.Id == id
 	})
 
@@ -36,11 +37,11 @@ func (repo *ProductRepository) GetProductById(id string) (*Product, error) {
 		return nil, fmt.Errorf("product with ID %v not found", id)
 	}
 
-	return &repo.items[index], nil
+	return &repo.GetProducts()[index], nil
 }
 
 func (repo *ProductRepository) IsProductValid(id string) bool {
-	index := slices.IndexFunc(repo.items, func(product Product) bool {
+	index := slices.IndexFunc(repo.GetProducts(), func(product Product) bool {
 		return product.Id == id
 	})
 
