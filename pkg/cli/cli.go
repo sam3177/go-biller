@@ -13,6 +13,7 @@ import (
 	"biller/pkg/utils"
 )
 
+// refactor here
 func getBillItemFromInput(reader *bufio.Reader, action string) (string, int) {
 	var promptVariant string
 	if action == "add" {
@@ -79,7 +80,7 @@ func HandleActionsOnBill(bill *bill.Bill) {
 	promptItems := []string{utils.BILL_ACTIONS["addProduct"], utils.BILL_ACTIONS["addTip"], utils.BILL_ACTIONS["printBill"], utils.BILL_ACTIONS["saveAndExit"], utils.BILL_ACTIONS["exit"]}
 
 	for {
-		action, error := selectAction(promptItems, len(bill.Products) > 0)
+		action, error := selectAction(promptItems, len(bill.GetProducts()) > 0)
 
 		if error != nil {
 			fmt.Printf("Prompt failed %v\n", error)
@@ -95,12 +96,12 @@ func executeAction(bill *bill.Bill, reader *bufio.Reader, action string) {
 	case utils.BILL_ACTIONS["addProduct"]:
 		name, quantity := getBillItemFromInput(reader, "add")
 		bill.AddProduct(name, quantity)
-		fmt.Println(bill.Products)
+		fmt.Println(bill.GetProducts())
 
 	case utils.BILL_ACTIONS["removeProduct"]:
 		name, quantity := getBillItemFromInput(reader, "remove")
 		bill.RemoveProduct(name, quantity)
-		fmt.Println(bill.Products)
+		fmt.Println(bill.GetProducts())
 
 	case utils.BILL_ACTIONS["addTip"]:
 		tip := inputHandler.GetValidFloatFromInput(reader, "Add the tip, please: ", utils.GetValidNumberFromInputOptions{ShouldBePositive: true})

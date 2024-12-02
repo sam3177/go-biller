@@ -17,24 +17,21 @@ type BillItem struct {
 }
 
 type Bill struct {
-	TableName   string
-	Products    []BillItem
-	Tip         float64
+	tableName   string
+	products    []BillItem
+	tip         float64
 	ProductRepo productRepository.ProductRepositoryInterface
 }
 
 func NewBill(tableName string, productRepo *productRepository.ProductRepository) *Bill {
 	return &Bill{
-		TableName:   tableName,
-		Products:    []BillItem{},
-		Tip:         0,
+		tableName:   tableName,
+		products:    []BillItem{},
+		tip:         0,
 		ProductRepo: productRepo,
 	}
 }
 
-// methods:
-
-// addProduct
 func (bill *Bill) AddProduct(id string, quantity int) {
 	if !bill.ProductRepo.IsProductValid(id) {
 		fmt.Printf("Product with ID %v is not a valid product in the system.", id)
@@ -42,17 +39,16 @@ func (bill *Bill) AddProduct(id string, quantity int) {
 		return
 	}
 
-	for i, value := range bill.Products {
+	for i, value := range bill.products {
 		if value.Id == id {
-			bill.Products[i].Quantity += quantity
+			bill.products[i].Quantity += quantity
 			return
 		}
 	}
 
-	bill.Products = append(bill.Products, BillItem{Id: id, Quantity: quantity})
+	bill.products = append(bill.products, BillItem{Id: id, Quantity: quantity})
 }
 
-// removeProduct
 func (bill *Bill) RemoveProduct(id string, quantity int) {
 	if !bill.ProductRepo.IsProductValid(id) {
 		fmt.Printf("Product with ID %v is not a valid product in the system.", id)
@@ -60,27 +56,29 @@ func (bill *Bill) RemoveProduct(id string, quantity int) {
 		return
 	}
 
-	for i, value := range bill.Products {
+	for i, value := range bill.products {
 		if value.Id == id {
-			bill.Products[i].Quantity -= quantity
-			if bill.Products[i].Quantity <= 0 {
-				bill.Products = append(bill.Products[:i], bill.Products[i+1:]...)
+			bill.products[i].Quantity -= quantity
+			if bill.products[i].Quantity <= 0 {
+				bill.products = append(bill.products[:i], bill.products[i+1:]...)
 			}
 			return
 		}
 	}
 }
 
-// setTip
-func (bill *Bill) SetTip(tip float64) {
-	bill.Tip = tip
+func (bill *Bill) GetProducts() []BillItem {
+	return bill.products
 }
 
-// makeTotal
+func (bill *Bill) SetTip(tip float64) {
+	bill.tip = tip
+}
+
 func (bill *Bill) calculateTotal() float64 {
 	var total float64 = 0
 
-	for _, value := range bill.Products {
+	for _, value := range bill.products {
 		product, _ := bill.ProductRepo.GetProductById(value.Id)
 		total += float64(value.Quantity) * product.UnitPrice
 	}
@@ -88,7 +86,6 @@ func (bill *Bill) calculateTotal() float64 {
 	return total
 }
 
-// formatBill // dots for spacing on format fn (extra)
 func (bill *Bill) formatBill() string {
 	makeFooterLine := func(name string, amount float64) string {
 		newLine := "\n" + name
@@ -106,10 +103,10 @@ func (bill *Bill) formatBill() string {
 	dottedLine := strings.Repeat("-", utils.BILL_ROW_LENGTH) + "\n"
 	formattedBill := fmt.Sprintf("%*s \n", (utils.BILL_ROW_LENGTH+len(billTitle))/2, billTitle)
 
-	formattedBill += fmt.Sprintf("Table name: %v \n", bill.TableName)
+	formattedBill += fmt.Sprintf("Table name: %v \n", bill.tableName)
 	formattedBill += dottedLine
 
-	for _, value := range bill.Products {
+	for _, value := range bill.products {
 		product, _ := bill.ProductRepo.GetProductById(value.Id)
 
 		formattedBill += fmt.Sprintf(product.Name + "\n")
@@ -131,15 +128,14 @@ func (bill *Bill) formatBill() string {
 
 	formattedBill += dottedLine
 	formattedBill += makeFooterLine("Subtotal", bill.calculateTotal())
-	formattedBill += makeFooterLine("Tip", bill.Tip)
+	formattedBill += makeFooterLine("Tip", bill.tip)
 	formattedBill += dottedLine
-	formattedBill += makeFooterLine("Total", bill.calculateTotal()+bill.Tip)
+	formattedBill += makeFooterLine("Total", bill.calculateTotal()+bill.tip)
 	formattedBill += "\n"
 
 	return formattedBill
 }
 
-// printBill
 func (bill *Bill) PrintBill() {
 	fmt.Print(bill.formatBill())
 }
@@ -147,7 +143,7 @@ func (bill *Bill) PrintBill() {
 func (bill *Bill) SaveBill() string {
 	data := []byte(bill.formatBill())
 
-	fileName := "table_" + bill.TableName + "_" + uuid.NewString() + ".txt"
+	fileName := "table_" + bill.tableName + "_" + uuid.NewString() + ".txt"
 
 	error := os.WriteFile(utils.BILLS_DIR+"/"+fileName, data, 0644)
 
