@@ -59,7 +59,6 @@ func selectAction(actions []string, hasProducts bool) (string, error) {
 	_, action, error := prompt.Run()
 
 	return action, error
-
 }
 
 func HandleActionsOnBill(bill *bill.Bill, productRepo productRepository.ProductRepositoryInterface) {

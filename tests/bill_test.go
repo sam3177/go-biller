@@ -1,6 +1,8 @@
-package bill
+package tests
 
 import (
+	"biller/pkg/bill"
+	billPackage "biller/pkg/bill"
 	"biller/pkg/productRepository"
 	"biller/pkg/utils"
 	"os"
@@ -16,14 +18,14 @@ var testProductsRepo = productRepository.NewLocalProductRepository(
 		{Id: "3", Name: "Product 3", UnitPrice: 3},
 	},
 )
-var testBillConfig = BillConfig{
+var testBillConfig = bill.BillConfig{
 	BillsDir:      utils.BILLS_DIR,
 	BillRowLength: utils.BILL_ROW_LENGTH,
 }
 
 func TestAddProduct(t *testing.T) {
 
-	bill := NewBill("Table 1", testProductsRepo, testBillConfig)
+	bill := billPackage.NewBill("Table 1", testProductsRepo, testBillConfig)
 
 	// Test adding a valid product
 	bill.AddProduct("1", 2)
@@ -49,7 +51,7 @@ func TestAddProduct(t *testing.T) {
 }
 
 func TestRemoveProduct(t *testing.T) {
-	bill := NewBill("Table 2", testProductsRepo, testBillConfig)
+	bill := billPackage.NewBill("Table 2", testProductsRepo, testBillConfig)
 
 	// Add 2 products to the bill
 
@@ -80,21 +82,21 @@ func TestRemoveProduct(t *testing.T) {
 }
 
 func TestCalculateTotal(t *testing.T) {
-	bill := NewBill("Table 1", testProductsRepo, testBillConfig)
+	bill := billPackage.NewBill("Table 1", testProductsRepo, testBillConfig)
 
 	bill.AddProduct("1", 4)
 	bill.AddProduct("2", 3)
 	bill.AddProduct("3", 1)
 
 	// Calculate the total
-	total := bill.calculateTotal()
+	total := bill.CalculateTotal()
 
 	// Assert the expected total
 	assert.Equal(t, 13.0, total)
 }
 
 func TestFormatBill(t *testing.T) {
-	bill := NewBill("Table 1", testProductsRepo, testBillConfig)
+	bill := billPackage.NewBill("Table 1", testProductsRepo, testBillConfig)
 
 	// Add some products to the bill
 	bill.AddProduct("1", 4)
@@ -104,7 +106,7 @@ func TestFormatBill(t *testing.T) {
 	bill.SetTip(34.6)
 
 	// Format the bill
-	formattedBill := bill.formatBill()
+	formattedBill := bill.FormatBill()
 
 	expectedText := `              ----Bill---- 
 Table name: Table 1 
@@ -129,7 +131,7 @@ Total                              44.60
 }
 
 func TestSaveBill(t *testing.T) {
-	bill := NewBill("Table 1", testProductsRepo, testBillConfig)
+	bill := billPackage.NewBill("Table 1", testProductsRepo, testBillConfig)
 
 	//make bills folder and cleanup at the end with defer
 	os.Mkdir("bills", 0755)
