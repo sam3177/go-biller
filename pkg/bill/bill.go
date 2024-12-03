@@ -15,12 +15,14 @@ type Bill struct {
 	products    []utils.BillItem
 	tip         float64
 	ProductRepo utils.ProductRepositoryInterface
+	Printer     utils.PrinterInterface
 	utils.BillConfig
 }
 
 func NewBill(
 	tableName string,
 	productRepo utils.ProductRepositoryInterface,
+	printer utils.PrinterInterface,
 	config utils.BillConfig,
 ) *Bill {
 	return &Bill{
@@ -29,6 +31,7 @@ func NewBill(
 		tip:         0,
 		ProductRepo: productRepo,
 		BillConfig:  config,
+		Printer:     printer,
 	}
 }
 
@@ -137,7 +140,7 @@ func (bill *Bill) FormatBill() string {
 }
 
 func (bill *Bill) PrintBill() {
-	fmt.Print(bill.FormatBill())
+	bill.Printer.Print(bill.FormatBill())
 }
 
 func (bill *Bill) SaveBill() string {

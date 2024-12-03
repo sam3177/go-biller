@@ -6,7 +6,7 @@ type GetValidNumberFromInputOptions struct {
 
 // printer
 type PrinterInterface interface {
-	Print()
+	Print(data string)
 }
 
 // productss
