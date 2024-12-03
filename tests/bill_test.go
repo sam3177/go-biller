@@ -1,7 +1,6 @@
 package tests
 
 import (
-	"biller/pkg/bill"
 	billPackage "biller/pkg/bill"
 	"biller/pkg/productRepository"
 	"biller/pkg/utils"
@@ -11,15 +10,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var testProductsRepo = productRepository.NewLocalProductRepository(
-	[]productRepository.Product{
-		{Id: "1", Name: "Product 1", UnitPrice: 1},
-		{Id: "2", Name: "Product 2", UnitPrice: 2},
-		{Id: "3", Name: "Product 3", UnitPrice: 3},
-	},
-)
-var testBillConfig = bill.BillConfig{
-	BillsDir:      utils.BILLS_DIR,
+var testProductsRepo = productRepository.NewLocalProductRepository(mockProducts)
+
+var testBillConfig = utils.BillConfig{
+	BillsDir:      "./bills",
 	BillRowLength: utils.BILL_ROW_LENGTH,
 }
 
@@ -53,8 +47,7 @@ func TestAddProduct(t *testing.T) {
 func TestRemoveProduct(t *testing.T) {
 	bill := billPackage.NewBill("Table 2", testProductsRepo, testBillConfig)
 
-	// Add 2 products to the bill
-
+	// Add 3 products to the bill
 	bill.AddProduct("1", 4)
 	bill.AddProduct("2", 45)
 	bill.AddProduct("3", 7)
@@ -135,11 +128,11 @@ func TestSaveBill(t *testing.T) {
 
 	//make bills folder and cleanup at the end with defer
 	os.Mkdir("bills", 0755)
-	defer os.RemoveAll(utils.BILLS_DIR)
+	defer os.RemoveAll(bill.BillsDir)
 
 	fileName := bill.SaveBill()
 
-	file, error := os.Open(utils.BILLS_DIR + "/" + fileName)
+	file, error := os.Open(bill.BillsDir + "/" + fileName)
 
 	if error != nil {
 		t.Errorf("file not found")

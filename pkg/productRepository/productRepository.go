@@ -1,36 +1,25 @@
 package productRepository
 
 import (
+	"biller/pkg/utils"
 	"fmt"
 	"slices"
 )
 
-type Product struct {
-	Id        string
-	Name      string
-	UnitPrice float64
-}
-
-type ProductRepositoryInterface interface {
-	GetProducts() []Product
-	GetProductById(id string) (*Product, error)
-	IsProductValid(id string) bool
-}
-
 type LocalProductRepository struct {
-	products []Product
+	products []utils.Product
 }
 
-func NewLocalProductRepository(products []Product) *LocalProductRepository {
+func NewLocalProductRepository(products []utils.Product) *LocalProductRepository {
 	return &LocalProductRepository{products: products}
 }
 
-func (repo *LocalProductRepository) GetProducts() []Product {
+func (repo *LocalProductRepository) GetProducts() []utils.Product {
 	return repo.products
 }
 
-func (repo *LocalProductRepository) GetProductById(id string) (*Product, error) {
-	index := slices.IndexFunc(repo.GetProducts(), func(product Product) bool {
+func (repo *LocalProductRepository) GetProductById(id string) (*utils.Product, error) {
+	index := slices.IndexFunc(repo.GetProducts(), func(product utils.Product) bool {
 		return product.Id == id
 	})
 
@@ -42,7 +31,7 @@ func (repo *LocalProductRepository) GetProductById(id string) (*Product, error) 
 }
 
 func (repo *LocalProductRepository) IsProductValid(id string) bool {
-	index := slices.IndexFunc(repo.GetProducts(), func(product Product) bool {
+	index := slices.IndexFunc(repo.GetProducts(), func(product utils.Product) bool {
 		return product.Id == id
 	})
 

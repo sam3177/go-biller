@@ -7,35 +7,25 @@ import (
 
 	"github.com/google/uuid"
 
-	"biller/pkg/productRepository"
+	"biller/pkg/utils"
 )
-
-type BillItem struct {
-	Id       string
-	Quantity int
-}
-
-type BillConfig struct {
-	BillsDir      string
-	BillRowLength int
-}
 
 type Bill struct {
 	tableName   string
-	products    []BillItem
+	products    []utils.BillItem
 	tip         float64
-	ProductRepo productRepository.ProductRepositoryInterface
-	BillConfig
+	ProductRepo utils.ProductRepositoryInterface
+	utils.BillConfig
 }
 
 func NewBill(
 	tableName string,
-	productRepo productRepository.ProductRepositoryInterface,
-	config BillConfig,
+	productRepo utils.ProductRepositoryInterface,
+	config utils.BillConfig,
 ) *Bill {
 	return &Bill{
 		tableName:   tableName,
-		products:    []BillItem{},
+		products:    []utils.BillItem{},
 		tip:         0,
 		ProductRepo: productRepo,
 		BillConfig:  config,
@@ -56,7 +46,7 @@ func (bill *Bill) AddProduct(id string, quantity int) {
 		}
 	}
 
-	bill.products = append(bill.products, BillItem{Id: id, Quantity: quantity})
+	bill.products = append(bill.products, utils.BillItem{Id: id, Quantity: quantity})
 }
 
 func (bill *Bill) RemoveProduct(id string, quantity int) {
@@ -77,7 +67,7 @@ func (bill *Bill) RemoveProduct(id string, quantity int) {
 	}
 }
 
-func (bill *Bill) GetProducts() []BillItem {
+func (bill *Bill) GetProducts() []utils.BillItem {
 	return bill.products
 }
 

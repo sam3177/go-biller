@@ -9,12 +9,11 @@ import (
 
 	"biller/pkg/bill"
 	"biller/pkg/inputHandler"
-	"biller/pkg/productRepository"
 	"biller/pkg/utils"
 )
 
 // refactor here
-func getBillItemFromInput(reader *bufio.Reader, productRepo productRepository.ProductRepositoryInterface, action string) (string, int) {
+func getBillItemFromInput(reader *bufio.Reader, productRepo utils.ProductRepositoryInterface, action string) (string, int) {
 	var promptVariant string
 	if action == "add" {
 		promptVariant = "add to"
@@ -61,7 +60,7 @@ func selectAction(actions []string, hasProducts bool) (string, error) {
 	return action, error
 }
 
-func HandleActionsOnBill(bill *bill.Bill, productRepo productRepository.ProductRepositoryInterface) {
+func HandleActionsOnBill(bill *bill.Bill, productRepo utils.ProductRepositoryInterface) {
 	reader := bufio.NewReader(os.Stdin)
 
 	promptItems := []string{utils.BILL_ACTIONS["addProduct"], utils.BILL_ACTIONS["addTip"], utils.BILL_ACTIONS["printBill"], utils.BILL_ACTIONS["saveAndExit"], utils.BILL_ACTIONS["exit"]}
@@ -78,7 +77,7 @@ func HandleActionsOnBill(bill *bill.Bill, productRepo productRepository.ProductR
 	}
 }
 
-func executeAction(bill *bill.Bill, productRepo productRepository.ProductRepositoryInterface, reader *bufio.Reader, action string) {
+func executeAction(bill *bill.Bill, productRepo utils.ProductRepositoryInterface, reader *bufio.Reader, action string) {
 	switch action {
 	case utils.BILL_ACTIONS["addProduct"]:
 		name, quantity := getBillItemFromInput(reader, productRepo, "add")
@@ -100,7 +99,7 @@ func executeAction(bill *bill.Bill, productRepo productRepository.ProductReposit
 
 	case utils.BILL_ACTIONS["saveAndExit"]:
 		fileName := bill.SaveBill()
-		utils.OpenFileInVsCode(utils.BILLS_DIR + "/" + fileName)
+		utils.OpenFileInVsCode(bill.BillsDir + "/" + fileName)
 		os.Exit(0)
 
 	case utils.BILL_ACTIONS["exit"]:

@@ -16,10 +16,11 @@ func main() {
 	bill := bill.NewBill(
 		tableName,
 		productRepo,
-		bill.BillConfig{
-			BillsDir:      utils.BILLS_DIR,
+		utils.BillConfig{
+			BillsDir:      utils.GetBillsDir(),
 			BillRowLength: utils.BILL_ROW_LENGTH,
-		})
+		},
+	)
 
 	cli.HandleActionsOnBill(bill, productRepo)
 }
