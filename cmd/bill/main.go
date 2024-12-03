@@ -16,7 +16,7 @@ func main() {
 	bill := bill.NewBill(
 		tableName,
 		productRepo,
-		bill.BillConfig{
+		utils.BillConfig{
 			BillsDir:      utils.BILLS_DIR,
 			BillRowLength: utils.BILL_ROW_LENGTH,
 		})

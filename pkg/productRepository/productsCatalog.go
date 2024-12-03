@@ -1,10 +1,12 @@
 package productRepository
 
 import (
+	"biller/pkg/utils"
+
 	"github.com/google/uuid"
 )
 
-var ProductsCatalog []Product = []Product{
+var ProductsCatalog []utils.Product = []utils.Product{
 	{
 		Id:        uuid.NewString(),
 		Name:      "Banana",

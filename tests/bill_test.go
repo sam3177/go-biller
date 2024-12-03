@@ -1,7 +1,6 @@
 package tests
 
 import (
-	"biller/pkg/bill"
 	billPackage "biller/pkg/bill"
 	"biller/pkg/productRepository"
 	"biller/pkg/utils"
@@ -12,13 +11,14 @@ import (
 )
 
 var testProductsRepo = productRepository.NewLocalProductRepository(
-	[]productRepository.Product{
+	[]utils.Product{
 		{Id: "1", Name: "Product 1", UnitPrice: 1},
 		{Id: "2", Name: "Product 2", UnitPrice: 2},
 		{Id: "3", Name: "Product 3", UnitPrice: 3},
 	},
 )
-var testBillConfig = bill.BillConfig{
+
+var testBillConfig = utils.BillConfig{
 	BillsDir:      utils.BILLS_DIR,
 	BillRowLength: utils.BILL_ROW_LENGTH,
 }
