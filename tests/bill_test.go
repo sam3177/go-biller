@@ -2,6 +2,7 @@ package tests
 
 import (
 	billPackage "biller/pkg/bill"
+	"biller/pkg/printer"
 	"biller/pkg/productRepository"
 	"biller/pkg/utils"
 	"os"
@@ -16,10 +17,11 @@ var testBillConfig = utils.BillConfig{
 	BillsDir:      "./bills",
 	BillRowLength: utils.BILL_ROW_LENGTH,
 }
+var testTermimalPrinter = printer.NewTerminalPrinter()
 
 func TestAddProduct(t *testing.T) {
 
-	bill := billPackage.NewBill("Table 1", testProductsRepo, testBillConfig)
+	bill := billPackage.NewBill("Table 1", testProductsRepo, testTermimalPrinter, testBillConfig)
 
 	// Test adding a valid product
 	bill.AddProduct("1", 2)
@@ -45,7 +47,7 @@ func TestAddProduct(t *testing.T) {
 }
 
 func TestRemoveProduct(t *testing.T) {
-	bill := billPackage.NewBill("Table 2", testProductsRepo, testBillConfig)
+	bill := billPackage.NewBill("Table 2", testProductsRepo, testTermimalPrinter, testBillConfig)
 
 	// Add 3 products to the bill
 	bill.AddProduct("1", 4)
@@ -75,7 +77,7 @@ func TestRemoveProduct(t *testing.T) {
 }
 
 func TestCalculateTotal(t *testing.T) {
-	bill := billPackage.NewBill("Table 1", testProductsRepo, testBillConfig)
+	bill := billPackage.NewBill("Table 1", testProductsRepo, testTermimalPrinter, testBillConfig)
 
 	bill.AddProduct("1", 4)
 	bill.AddProduct("2", 3)
@@ -89,7 +91,7 @@ func TestCalculateTotal(t *testing.T) {
 }
 
 func TestFormatBill(t *testing.T) {
-	bill := billPackage.NewBill("Table 1", testProductsRepo, testBillConfig)
+	bill := billPackage.NewBill("Table 1", testProductsRepo, testTermimalPrinter, testBillConfig)
 
 	// Add some products to the bill
 	bill.AddProduct("1", 4)
@@ -124,7 +126,7 @@ Total                              44.60
 }
 
 func TestSaveBill(t *testing.T) {
-	bill := billPackage.NewBill("Table 1", testProductsRepo, testBillConfig)
+	bill := billPackage.NewBill("Table 1", testProductsRepo, testTermimalPrinter, testBillConfig)
 
 	//make bills folder and cleanup at the end with defer
 	os.Mkdir("bills", 0755)
