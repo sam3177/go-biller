@@ -10,13 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var testProductsRepo = productRepository.NewLocalProductRepository(
-	[]utils.Product{
-		{Id: "1", Name: "Product 1", UnitPrice: 1},
-		{Id: "2", Name: "Product 2", UnitPrice: 2},
-		{Id: "3", Name: "Product 3", UnitPrice: 3},
-	},
-)
+var testProductsRepo = productRepository.NewLocalProductRepository(mockProducts)
 
 var testBillConfig = utils.BillConfig{
 	BillsDir:      "./bills",
@@ -53,8 +47,7 @@ func TestAddProduct(t *testing.T) {
 func TestRemoveProduct(t *testing.T) {
 	bill := billPackage.NewBill("Table 2", testProductsRepo, testBillConfig)
 
-	// Add 2 products to the bill
-
+	// Add 3 products to the bill
 	bill.AddProduct("1", 4)
 	bill.AddProduct("2", 45)
 	bill.AddProduct("3", 7)
