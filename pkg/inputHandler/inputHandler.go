@@ -4,6 +4,7 @@ import (
 	"biller/pkg/utils"
 	"bufio"
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
 )
@@ -47,4 +48,16 @@ func GetValidFloatFromInput(reader *bufio.Reader, prompt string, options utils.G
 	}
 
 	return floatValue
+}
+
+func GetTableName() string {
+	reader := bufio.NewReader(os.Stdin)
+	tableName, error := GetInput(reader, "Please, type the table name: ")
+
+	if error != nil {
+		fmt.Println("Error:", error)
+		return GetTableName()
+	}
+
+	return tableName
 }

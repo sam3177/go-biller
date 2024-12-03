@@ -46,24 +46,6 @@ func getBillItemFromInput(reader *bufio.Reader, productRepo productRepository.Pr
 	return products[i].Id, quantity
 }
 
-func InitializeBill(productRepo productRepository.ProductRepositoryInterface) *bill.Bill {
-	reader := bufio.NewReader(os.Stdin)
-
-	tableName, _ := inputHandler.GetInput(reader, "Please, type the table name: ")
-
-	// TODO: refactor here
-
-	bill := bill.NewBill(
-		tableName,
-		productRepo,
-		bill.BillConfig{
-			BillsDir:      utils.BILLS_DIR,
-			BillRowLength: utils.BILL_ROW_LENGTH,
-		})
-
-	return bill
-}
-
 func selectAction(actions []string, hasProducts bool) (string, error) {
 	if hasProducts {
 		actions = append(actions[0:1], append([]string{utils.BILL_ACTIONS["removeProduct"]}, actions[1:]...)...)
