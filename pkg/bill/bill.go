@@ -85,7 +85,7 @@ func (bill *Bill) SetTip(tip float64) {
 	bill.tip = tip
 }
 
-func (bill *Bill) calculateTotal() float64 {
+func (bill *Bill) CalculateTotal() float64 {
 	var total float64 = 0
 
 	for _, value := range bill.products {
@@ -96,7 +96,7 @@ func (bill *Bill) calculateTotal() float64 {
 	return total
 }
 
-func (bill *Bill) formatBill() string {
+func (bill *Bill) FormatBill() string {
 	makeFooterLine := func(name string, amount float64) string {
 		newLine := "\n" + name
 
@@ -137,21 +137,21 @@ func (bill *Bill) formatBill() string {
 	}
 
 	formattedBill += dottedLine
-	formattedBill += makeFooterLine("Subtotal", bill.calculateTotal())
+	formattedBill += makeFooterLine("Subtotal", bill.CalculateTotal())
 	formattedBill += makeFooterLine("Tip", bill.tip)
 	formattedBill += dottedLine
-	formattedBill += makeFooterLine("Total", bill.calculateTotal()+bill.tip)
+	formattedBill += makeFooterLine("Total", bill.CalculateTotal()+bill.tip)
 	formattedBill += "\n"
 
 	return formattedBill
 }
 
 func (bill *Bill) PrintBill() {
-	fmt.Print(bill.formatBill())
+	fmt.Print(bill.FormatBill())
 }
 
 func (bill *Bill) SaveBill() string {
-	data := []byte(bill.formatBill())
+	data := []byte(bill.FormatBill())
 
 	fileName := "table_" + bill.tableName + "_" + uuid.NewString() + ".txt"
 
