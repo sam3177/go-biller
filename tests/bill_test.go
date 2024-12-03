@@ -19,7 +19,7 @@ var testProductsRepo = productRepository.NewLocalProductRepository(
 )
 
 var testBillConfig = utils.BillConfig{
-	BillsDir:      utils.BILLS_DIR,
+	BillsDir:      "./bills",
 	BillRowLength: utils.BILL_ROW_LENGTH,
 }
 
@@ -135,11 +135,11 @@ func TestSaveBill(t *testing.T) {
 
 	//make bills folder and cleanup at the end with defer
 	os.Mkdir("bills", 0755)
-	defer os.RemoveAll(utils.BILLS_DIR)
+	defer os.RemoveAll(bill.BillsDir)
 
 	fileName := bill.SaveBill()
 
-	file, error := os.Open(utils.BILLS_DIR + "/" + fileName)
+	file, error := os.Open(bill.BillsDir + "/" + fileName)
 
 	if error != nil {
 		t.Errorf("file not found")

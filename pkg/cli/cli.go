@@ -99,7 +99,7 @@ func executeAction(bill *bill.Bill, productRepo utils.ProductRepositoryInterface
 
 	case utils.BILL_ACTIONS["saveAndExit"]:
 		fileName := bill.SaveBill()
-		utils.OpenFileInVsCode(utils.BILLS_DIR + "/" + fileName)
+		utils.OpenFileInVsCode(bill.BillsDir + "/" + fileName)
 		os.Exit(0)
 
 	case utils.BILL_ACTIONS["exit"]:
