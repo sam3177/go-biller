@@ -100,6 +100,8 @@ func (handler *InputHandler) getProductItem(action string) utils.Product {
 
 	products := handler.productRepo.GetProducts()
 
+	// TODO: show only available product to remove for "remove" action (products that are already in cart)
+
 	prompt := promptui.Select{
 		Label: fmt.Sprintf("Please type in the product you want to %v the bill: ", promptVariant),
 		Items: func() []string {
@@ -147,7 +149,13 @@ func (handler *InputHandler) HandleActions() {
 
 	handler.bill.SetTableName(tableName)
 
-	promptItems := []string{utils.BILL_ACTIONS["addProduct"], utils.BILL_ACTIONS["addTip"], utils.BILL_ACTIONS["printBill"], utils.BILL_ACTIONS["saveAndExit"], utils.BILL_ACTIONS["exit"]}
+	promptItems := []string{
+		utils.BILL_ACTIONS["addProduct"],
+		utils.BILL_ACTIONS["addTip"],
+		utils.BILL_ACTIONS["printBill"],
+		utils.BILL_ACTIONS["saveAndExit"],
+		utils.BILL_ACTIONS["exit"],
+	}
 
 	for {
 		action, error := handler.selectAction(promptItems, len(handler.bill.GetProducts()) > 0)
