@@ -2,21 +2,19 @@ package main
 
 import (
 	"biller/pkg/bill"
-	"biller/pkg/cli"
 	"biller/pkg/inputHandler"
 	"biller/pkg/printer"
 	"biller/pkg/productRepository"
 	"biller/pkg/utils"
+	"bufio"
+	"os"
 )
 
 func main() {
 	productRepo := productRepository.NewLocalProductRepository(productRepository.ProductsCatalog)
 	termimalPrinter := printer.NewTerminalPrinter()
 
-	tableName := inputHandler.GetTableName()
-
 	bill := bill.NewBill(
-		tableName,
 		productRepo,
 		termimalPrinter,
 		utils.BillConfig{
@@ -25,5 +23,11 @@ func main() {
 		},
 	)
 
-	cli.HandleActionsOnBill(bill, productRepo)
+	inputHandler := inputHandler.NewInputHandler(
+		bufio.NewReader(os.Stdin),
+		productRepo,
+		bill,
+	)
+
+	inputHandler.HandleActions()
 }
