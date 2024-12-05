@@ -45,6 +45,9 @@ func (bill *Bill) AddProduct(id string, quantity int) {
 
 		return
 	}
+	if quantity == 0 {
+		return
+	}
 
 	for i, value := range bill.products {
 		if value.Id == id {
