@@ -1,8 +1,10 @@
 package main
 
 import (
+	"biller/pkg/actionsMenuHandler"
 	"biller/pkg/bill"
 	"biller/pkg/inputHandler"
+	"biller/pkg/inputValidator"
 	"biller/pkg/printer"
 	"biller/pkg/productRepository"
 	"biller/pkg/utils"
@@ -23,11 +25,16 @@ func main() {
 		},
 	)
 
+	inputValidator := inputValidator.NewInputValidator()
+
 	inputHandler := inputHandler.NewInputHandler(
 		bufio.NewReader(os.Stdin),
-		productRepo,
-		bill,
+		inputValidator,
 	)
 
-	inputHandler.HandleActions()
+	actionsMenu := actionsMenuHandler.NewActionMenuHandler(
+		bill, inputHandler,
+	)
+
+	actionsMenu.HandleActions()
 }
