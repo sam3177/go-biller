@@ -10,6 +10,8 @@ import (
 	"biller/pkg/utils"
 )
 
+// TODO: date on the bill
+
 type Bill struct {
 	tableName   string
 	products    []utils.BillItem
@@ -20,19 +22,21 @@ type Bill struct {
 }
 
 func NewBill(
-	tableName string,
 	productRepo utils.ProductRepositoryInterface,
 	printer utils.PrinterInterface,
 	config utils.BillConfig,
 ) *Bill {
 	return &Bill{
-		tableName:   tableName,
 		products:    []utils.BillItem{},
 		tip:         0,
 		ProductRepo: productRepo,
 		BillConfig:  config,
 		Printer:     printer,
 	}
+}
+
+func (bill *Bill) SetTableName(name string) {
+	bill.tableName = name
 }
 
 func (bill *Bill) AddProduct(id string, quantity int) {
