@@ -32,3 +32,17 @@ type BillConfig struct {
 	BillsDir      string
 	BillRowLength int
 }
+
+// input validator
+type InputValidatorInterface interface {
+	ValidateFloat(string) bool
+	ValidateInt(string) bool
+	ValidatePositive(string) bool
+}
+
+// input handler
+type InputHandlerInterface interface {
+	GetTableName() string
+	GetBillItem([]Product, string) (string, int)
+	GetTip() float64
+}
