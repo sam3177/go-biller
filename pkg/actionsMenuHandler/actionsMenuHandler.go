@@ -12,7 +12,7 @@ import (
 
 type ActionsMenuHandler struct {
 	bill         *bill.Bill
-	inputHandler *inputHandler.InputHandler // interface here
+	inputHandler utils.InputHandlerInterface
 }
 
 func NewActionMenuHandler(bill *bill.Bill, inputHandler *inputHandler.InputHandler) *ActionsMenuHandler {
@@ -77,7 +77,7 @@ func (menuHandler *ActionsMenuHandler) executeAction(action string) {
 		fmt.Println(menuHandler.bill.GetProducts())
 
 	case utils.BILL_ACTIONS["addTip"]:
-		tip := menuHandler.inputHandler.GetValidFloatFromInput("Add the tip, please: ", utils.GetValidNumberFromInputOptions{ShouldBePositive: true})
+		tip := menuHandler.inputHandler.GetTip()
 		menuHandler.bill.SetTip(tip)
 		fmt.Println(menuHandler.bill)
 
