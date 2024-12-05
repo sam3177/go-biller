@@ -2,21 +2,19 @@ package inputHandler
 
 import (
 	"biller/pkg/utils"
-	"bufio"
 	"fmt"
 	"strconv"
-	"strings"
 
 	"github.com/manifoldco/promptui"
 )
 
 type InputHandler struct {
-	reader    *bufio.Reader
+	reader    utils.InputReaderInterface
 	validator utils.InputValidatorInterface
 }
 
 func NewInputHandler(
-	reader *bufio.Reader,
+	reader utils.InputReaderInterface,
 	validator utils.InputValidatorInterface,
 ) *InputHandler {
 	return &InputHandler{
@@ -25,19 +23,8 @@ func NewInputHandler(
 	}
 }
 
-func (handler *InputHandler) getInput(prompt string) (string, error) {
-	fmt.Print(prompt)
-	value, error := handler.reader.ReadString('\n')
-
-	if error != nil {
-		fmt.Println("Error:", error)
-	}
-
-	return strings.TrimSpace(value), error
-}
-
 func (handler *InputHandler) GetValidIntFromInput(prompt string, options utils.GetValidNumberFromInputOptions) int {
-	value, _ := handler.getInput(prompt)
+	value, _ := handler.reader.GetInput(prompt)
 
 	if !handler.validator.ValidateInt(value) || (options.ShouldBePositive && !handler.validator.ValidatePositive(value)) {
 		return handler.GetValidIntFromInput(prompt, options)
@@ -48,7 +35,7 @@ func (handler *InputHandler) GetValidIntFromInput(prompt string, options utils.G
 }
 
 func (handler *InputHandler) getValidFloatFromInput(prompt string, options utils.GetValidNumberFromInputOptions) float64 {
-	value, _ := handler.getInput(prompt)
+	value, _ := handler.reader.GetInput(prompt)
 
 	if !handler.validator.ValidateFloat(value) || (options.ShouldBePositive && !handler.validator.ValidatePositive(value)) {
 		return handler.getValidFloatFromInput(prompt, options)
@@ -59,7 +46,7 @@ func (handler *InputHandler) getValidFloatFromInput(prompt string, options utils
 }
 
 func (handler *InputHandler) GetTableName() string {
-	tableName, error := handler.getInput("Please, type the table name: ")
+	tableName, error := handler.reader.GetInput("Please, type the table name: ")
 
 	if error != nil {
 		fmt.Println("Error:", error)

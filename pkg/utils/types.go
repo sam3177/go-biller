@@ -46,3 +46,7 @@ type InputHandlerInterface interface {
 	GetBillItem([]Product, string) (string, int)
 	GetTip() float64
 }
+
+type InputReaderInterface interface {
+	GetInput(string) (string, error)
+}

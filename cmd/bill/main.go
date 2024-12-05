@@ -26,9 +26,10 @@ func main() {
 	)
 
 	inputValidator := inputValidator.NewInputValidator()
+	inputReader := inputHandler.NewInputReader(bufio.NewReader(os.Stdin))
 
 	inputHandler := inputHandler.NewInputHandler(
-		bufio.NewReader(os.Stdin),
+		inputReader,
 		inputValidator,
 	)
 
