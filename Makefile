@@ -5,7 +5,7 @@ OUTPUT_FILE := $(OUTPUT_DIR)/$(APP_NAME)
 
 test:
 	@echo "Running tests..."
-	go test -v ./tests
+	go test -v ./...
 
 build:
 	@echo "Building $(APP_NAME)..."

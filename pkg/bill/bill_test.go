@@ -1,17 +1,17 @@
-package tests
+package bill
 
 import (
-	billPackage "biller/pkg/bill"
 	"biller/pkg/printer"
 	"biller/pkg/productRepository"
 	"biller/pkg/utils"
+	"biller/tests"
 	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
-var testProductsRepo = productRepository.NewLocalProductRepository(mockProducts)
+var testProductsRepo = productRepository.NewLocalProductRepository(tests.MockProducts)
 
 var testBillConfig = utils.BillConfig{
 	BillsDir:      "./bills",
@@ -21,7 +21,7 @@ var testTermimalPrinter = printer.NewTerminalPrinter()
 
 func TestAddProduct(t *testing.T) {
 
-	bill := billPackage.NewBill(testProductsRepo, testTermimalPrinter, testBillConfig)
+	bill := NewBill(testProductsRepo, testTermimalPrinter, testBillConfig)
 
 	// Test adding a valid product
 	bill.AddProduct("1", 2)
@@ -47,7 +47,7 @@ func TestAddProduct(t *testing.T) {
 }
 
 func TestRemoveProduct(t *testing.T) {
-	bill := billPackage.NewBill(testProductsRepo, testTermimalPrinter, testBillConfig)
+	bill := NewBill(testProductsRepo, testTermimalPrinter, testBillConfig)
 
 	// Add 3 products to the bill
 	bill.AddProduct("1", 4)
@@ -77,7 +77,7 @@ func TestRemoveProduct(t *testing.T) {
 }
 
 func TestCalculateTotal(t *testing.T) {
-	bill := billPackage.NewBill(testProductsRepo, testTermimalPrinter, testBillConfig)
+	bill := NewBill(testProductsRepo, testTermimalPrinter, testBillConfig)
 
 	bill.AddProduct("1", 4)
 	bill.AddProduct("2", 3)
@@ -91,7 +91,7 @@ func TestCalculateTotal(t *testing.T) {
 }
 
 func TestFormatBill(t *testing.T) {
-	bill := billPackage.NewBill(testProductsRepo, testTermimalPrinter, testBillConfig)
+	bill := NewBill(testProductsRepo, testTermimalPrinter, testBillConfig)
 	bill.SetTableName("Table 1")
 
 	// Add some products to the bill
@@ -127,7 +127,7 @@ Total                              44.60
 }
 
 func TestSaveBill(t *testing.T) {
-	bill := billPackage.NewBill(testProductsRepo, testTermimalPrinter, testBillConfig)
+	bill := NewBill(testProductsRepo, testTermimalPrinter, testBillConfig)
 
 	//make bills folder and cleanup at the end with defer
 	os.Mkdir("bills", 0755)

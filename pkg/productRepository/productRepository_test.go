@@ -1,23 +1,23 @@
-package tests
+package productRepository
 
 import (
-	"biller/pkg/productRepository"
 	"biller/pkg/utils"
+	"biller/tests"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func TestGetProductById(t *testing.T) {
-	var repo = productRepository.NewLocalProductRepository(mockProducts)
+	var repo = NewLocalProductRepository(tests.MockProducts)
 
 	tests := []struct {
 		id          string
 		expected    *utils.Product
 		expectError bool
 	}{
-		{"1", &mockProducts[0], false},
-		{"2", &mockProducts[1], false},
+		{"1", &tests.MockProducts[0], false},
+		{"2", &tests.MockProducts[1], false},
 		{"4", nil, true},
 	}
 
@@ -34,7 +34,7 @@ func TestGetProductById(t *testing.T) {
 }
 
 func TestIsProductValid(t *testing.T) {
-	repo := productRepository.NewLocalProductRepository(mockProducts)
+	repo := NewLocalProductRepository(tests.MockProducts)
 
 	tests := []struct {
 		id       string
