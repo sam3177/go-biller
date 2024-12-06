@@ -1,17 +1,17 @@
 package bill
 
 import (
+	"biller/mocks"
 	"biller/pkg/printer"
 	"biller/pkg/productRepository"
 	"biller/pkg/utils"
-	"biller/tests"
 	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
-var testProductsRepo = productRepository.NewLocalProductRepository(tests.MockProducts)
+var testProductsRepo = productRepository.NewLocalProductRepository(mocks.MockProducts)
 
 var testBillConfig = utils.BillConfig{
 	BillsDir:      "./bills",
