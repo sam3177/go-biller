@@ -1,7 +1,7 @@
-package tests
+package productRepository
 
 import (
-	"biller/pkg/productRepository"
+	"biller/mocks"
 	"biller/pkg/utils"
 	"testing"
 
@@ -9,15 +9,15 @@ import (
 )
 
 func TestGetProductById(t *testing.T) {
-	var repo = productRepository.NewLocalProductRepository(mockProducts)
+	var repo = NewLocalProductRepository(mocks.MockProducts)
 
 	tests := []struct {
 		id          string
 		expected    *utils.Product
 		expectError bool
 	}{
-		{"1", &mockProducts[0], false},
-		{"2", &mockProducts[1], false},
+		{"1", &mocks.MockProducts[0], false},
+		{"2", &mocks.MockProducts[1], false},
 		{"4", nil, true},
 	}
 
@@ -34,7 +34,7 @@ func TestGetProductById(t *testing.T) {
 }
 
 func TestIsProductValid(t *testing.T) {
-	repo := productRepository.NewLocalProductRepository(mockProducts)
+	repo := NewLocalProductRepository(mocks.MockProducts)
 
 	tests := []struct {
 		id       string
