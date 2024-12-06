@@ -34,11 +34,11 @@ func (handler *InputHandler) GetValidIntFromInput(prompt string, options utils.G
 	return int(intValue)
 }
 
-func (handler *InputHandler) getValidFloatFromInput(prompt string, options utils.GetValidNumberFromInputOptions) float64 {
+func (handler *InputHandler) GetValidFloatFromInput(prompt string, options utils.GetValidNumberFromInputOptions) float64 {
 	value, _ := handler.reader.GetInput(prompt)
 
 	if !handler.validator.ValidateFloat(value) || (options.ShouldBePositive && !handler.validator.ValidatePositive(value)) {
-		return handler.getValidFloatFromInput(prompt, options)
+		return handler.GetValidFloatFromInput(prompt, options)
 	}
 	floatValue, _ := strconv.ParseFloat(value, 64)
 
@@ -50,6 +50,9 @@ func (handler *InputHandler) GetTableName() string {
 
 	if error != nil {
 		fmt.Println("Error:", error)
+	}
+
+	if !handler.validator.ValidateMinLength(tableName, 1) {
 		return handler.GetTableName()
 	}
 
@@ -85,17 +88,14 @@ func (handler *InputHandler) getProductItem(products []utils.Product, action str
 }
 
 func (handler *InputHandler) GetTip() float64 {
-	return handler.getValidFloatFromInput("Add the tip, please: ", utils.GetValidNumberFromInputOptions{ShouldBePositive: true})
+	return handler.GetValidFloatFromInput("Add the tip, please: ", utils.GetValidNumberFromInputOptions{ShouldBePositive: true})
 }
 
 func (handler *InputHandler) getBillItemQuantity(productName string, action string) int {
-
-	quantity := handler.GetValidIntFromInput(
+	return handler.GetValidIntFromInput(
 		fmt.Sprintf("Please provide the quantity of %v you want to %v: ", productName, action),
 		// TODO: maibe an interface down here
 		utils.GetValidNumberFromInputOptions{ShouldBePositive: true})
-
-	return quantity
 }
 
 func (handler *InputHandler) GetBillItem(products []utils.Product, action string) (string, int) {
