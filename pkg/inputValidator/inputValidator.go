@@ -34,6 +34,7 @@ func (validator *InputValidator) ValidatePositive(value string) bool {
 
 	if error != nil {
 		fmt.Println("Error:", error)
+		return false
 	}
 
 	if num < 0 {
@@ -41,4 +42,19 @@ func (validator *InputValidator) ValidatePositive(value string) bool {
 	}
 
 	return num > 0
+}
+
+func (validator *InputValidator) ValidateMinLength(value string, length int) bool {
+	fmt.Println("asdfasd", length)
+	if len(value) < length {
+		fmt.Printf("The value must have a minimum length of %d.\n", length)
+	}
+
+	return len(value) >= length
+}
+func (validator *InputValidator) ValidateMaxLength(value string, length int) bool {
+	if len(value) >= length {
+		fmt.Printf("The value must have a maximum length of %d.\n", length)
+	}
+	return len(value) < length
 }

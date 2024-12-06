@@ -38,6 +38,8 @@ type InputValidatorInterface interface {
 	ValidateFloat(string) bool
 	ValidateInt(string) bool
 	ValidatePositive(string) bool
+	ValidateMinLength(string, int) bool
+	ValidateMaxLength(string, int) bool
 }
 
 // input handler
