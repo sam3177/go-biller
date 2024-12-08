@@ -50,3 +50,32 @@ func TestIsProductValid(t *testing.T) {
 		assert.Equal(t, test.expected, result)
 	}
 }
+
+func TestIsEnoughProductInStock(t *testing.T) {
+	repo := NewLocalProductRepository(mocks.MockProducts)
+
+	tests := []struct {
+		id       string
+		quantity float64
+		expected bool
+	}{
+		{"1", 30.0, true},
+		{"2", 199.0, false},
+		{"4", 3, false},
+	}
+
+	for _, test := range tests {
+		result := repo.IsEnoughProductInStock(test.id, test.quantity)
+		assert.Equal(t, test.expected, result)
+	}
+
+}
+
+func TestUpdateStock(t *testing.T) {
+	repo := NewLocalProductRepository(mocks.MockProducts)
+
+	repo.UpdateStock("1", 5)
+	product, _ := repo.GetProductById("1")
+
+	assert.Equal(t, 45.0, product.Stock)
+}
