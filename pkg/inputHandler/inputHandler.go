@@ -91,14 +91,14 @@ func (handler *InputHandler) GetTip() float64 {
 	return handler.GetValidFloatFromInput("Add the tip, please: ", utils.GetValidNumberFromInputOptions{ShouldBePositive: true})
 }
 
-func (handler *InputHandler) getBillItemQuantity(productName string, action string) int {
-	return handler.GetValidIntFromInput(
+func (handler *InputHandler) getBillItemQuantity(productName string, action string) float64 {
+	return handler.GetValidFloatFromInput(
 		fmt.Sprintf("Please provide the quantity of %v you want to %v: ", productName, action),
 		// TODO: maibe an interface down here
 		utils.GetValidNumberFromInputOptions{ShouldBePositive: true})
 }
 
-func (handler *InputHandler) GetBillItem(products []utils.Product, action string) (string, int) {
+func (handler *InputHandler) GetBillItem(products []utils.Product, action string) (string, float64) {
 	product := handler.getProductItem(products, action)
 	quantity := handler.getBillItemQuantity(product.Name, action)
 

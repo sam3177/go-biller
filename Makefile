@@ -7,6 +7,10 @@ test:
 	@echo "Running tests..."
 	go test -v ./...
 
+test-coverage:
+	@echo "Running tests..."
+	go test -cover ./...
+
 build:
 	@echo "Building $(APP_NAME)..."
 	go build -o $(OUTPUT_FILE) $(CMD_DIR)

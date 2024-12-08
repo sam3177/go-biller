@@ -39,13 +39,19 @@ func (bill *Bill) SetTableName(name string) {
 	bill.tableName = name
 }
 
-func (bill *Bill) AddProduct(id string, quantity int) {
+func (bill *Bill) AddProduct(id string, quantity float64) {
 	if !bill.ProductRepo.IsProductValid(id) {
 		fmt.Printf("Product with ID %v is not a valid product in the system.", id)
-
 		return
 	}
-	if quantity == 0 {
+	if quantity <= 0 {
+		return
+	}
+
+	removeFromStockError := bill.ProductRepo.UpdateStock(id, quantity*-1)
+
+	if removeFromStockError != nil {
+		fmt.Println(removeFromStockError)
 		return
 	}
 
@@ -59,7 +65,7 @@ func (bill *Bill) AddProduct(id string, quantity int) {
 	bill.products = append(bill.products, utils.BillItem{Id: id, Quantity: quantity})
 }
 
-func (bill *Bill) RemoveProduct(id string, quantity int) {
+func (bill *Bill) RemoveProduct(id string, quantity float64) {
 	if !bill.ProductRepo.IsProductValid(id) {
 		fmt.Printf("Product with ID %v is not a valid product in the system.", id)
 

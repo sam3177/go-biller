@@ -12,20 +12,31 @@ type PrinterInterface interface {
 // productss
 type ProductRepositoryInterface interface {
 	GetProducts() []Product
-	GetProductById(id string) (*Product, error)
-	IsProductValid(id string) bool
+	GetProductById(string) (*Product, error)
+	UpdateStock(string, float64) error
+	IsProductValid(string) bool
 }
+
+// UnitType represents a type for product units
+type UnitType string
+
+const (
+	UnitPiece UnitType = "piece"
+	UnitKg    UnitType = "kg"
+)
 
 type Product struct {
 	Id        string
 	Name      string
 	UnitPrice float64
+	UnitType  UnitType
+	Stock     float64
 }
 
 // bills
 type BillItem struct {
 	Id       string
-	Quantity int
+	Quantity float64
 }
 
 type BillConfig struct {
@@ -45,7 +56,7 @@ type InputValidatorInterface interface {
 // input handler
 type InputHandlerInterface interface {
 	GetTableName() string
-	GetBillItem([]Product, string) (string, int)
+	GetBillItem([]Product, string) (string, float64)
 	GetTip() float64
 }
 

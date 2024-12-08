@@ -1,4 +1,4 @@
-package inputHandler
+package inputReader
 
 import (
 	"bufio"

@@ -5,13 +5,12 @@ import (
 	"biller/pkg/printer"
 	"biller/pkg/productRepository"
 	"biller/pkg/utils"
+	"fmt"
 	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
-
-var testProductsRepo = productRepository.NewLocalProductRepository(mocks.MockProducts)
 
 var testBillConfig = utils.BillConfig{
 	BillsDir:      "./bills",
@@ -20,6 +19,7 @@ var testBillConfig = utils.BillConfig{
 var testTermimalPrinter = printer.NewTerminalPrinter()
 
 func TestAddProduct(t *testing.T) {
+	testProductsRepo := productRepository.NewLocalProductRepository(mocks.GetMockProductsCopy())
 
 	bill := NewBill(testProductsRepo, testTermimalPrinter, testBillConfig)
 
@@ -27,37 +27,54 @@ func TestAddProduct(t *testing.T) {
 	bill.AddProduct("1", 2)
 	assert.Equal(t, 1, len(bill.GetProducts()))
 	assert.Equal(t, "1", bill.GetProducts()[0].Id)
-	assert.Equal(t, 2, bill.GetProducts()[0].Quantity)
+	assert.Equal(t, 2.0, bill.GetProducts()[0].Quantity)
+
+	product, _ := bill.ProductRepo.GetProductById("1")
+	assert.Equal(t, 38.0, product.Stock)
 
 	// Test adding the same product again
 	bill.AddProduct("1", 3)
 	assert.Equal(t, 1, len(bill.GetProducts()))
 	assert.Equal(t, "1", bill.GetProducts()[0].Id)
-	assert.Equal(t, 5, bill.GetProducts()[0].Quantity)
+	assert.Equal(t, 5.0, bill.GetProducts()[0].Quantity)
+	assert.Equal(t, 35.0, product.Stock)
 
 	// Test adding another valid product
 	bill.AddProduct("2", 1)
 	assert.Equal(t, 2, len(bill.GetProducts()))
-	assert.Equal(t, "2", bill.GetProducts()[1].Id)
-	assert.Equal(t, 1, bill.GetProducts()[1].Quantity)
+
+	// Test adding a product with unitType kg, and floating point quantity (succeeds)
+	bill.AddProduct("3", 5.56)
+	assert.Equal(t, 5.56, bill.GetProducts()[2].Quantity)
+
+	// Test adding a product with unitType piece, but floating point quantity (fails)
+	bill.AddProduct("2", 5.56)
+	assert.Equal(t, 1.0, bill.GetProducts()[1].Quantity)
+
+	//Test adding a valid product, but with a quantity greater than stock (fails)
+	bill.AddProduct("2", 999)
+	assert.Equal(t, 1.0, bill.GetProducts()[1].Quantity)
 
 	// Test adding an invalid product
 	bill.AddProduct("4", 1)
-	assert.Equal(t, 2, len(bill.GetProducts())) // No change in length
+	assert.Equal(t, 3, len(bill.GetProducts())) // No change in length
 }
 
 func TestRemoveProduct(t *testing.T) {
+	testProductsRepo := productRepository.NewLocalProductRepository(mocks.GetMockProductsCopy())
+	fmt.Println("test remove", mocks.MockProducts)
+
 	bill := NewBill(testProductsRepo, testTermimalPrinter, testBillConfig)
 
 	// Add 3 products to the bill
 	bill.AddProduct("1", 4)
-	bill.AddProduct("2", 45)
+	bill.AddProduct("2", 5)
 	bill.AddProduct("3", 7)
 
 	// Test removing a valid product with quantity less than existing
 	bill.RemoveProduct("1", 2)
 	assert.Equal(t, 3, len(bill.GetProducts()))
-	assert.Equal(t, 2, bill.GetProducts()[0].Quantity)
+	assert.Equal(t, 2.0, bill.GetProducts()[0].Quantity)
 
 	// Test removing a valid product with quantity equal to existing
 	bill.RemoveProduct("2", 45)
@@ -77,6 +94,8 @@ func TestRemoveProduct(t *testing.T) {
 }
 
 func TestCalculateTotal(t *testing.T) {
+	testProductsRepo := productRepository.NewLocalProductRepository(mocks.GetMockProductsCopy())
+
 	bill := NewBill(testProductsRepo, testTermimalPrinter, testBillConfig)
 
 	bill.AddProduct("1", 4)
@@ -91,6 +110,8 @@ func TestCalculateTotal(t *testing.T) {
 }
 
 func TestFormatBill(t *testing.T) {
+	testProductsRepo := productRepository.NewLocalProductRepository(mocks.GetMockProductsCopy())
+
 	bill := NewBill(testProductsRepo, testTermimalPrinter, testBillConfig)
 	bill.SetTableName("Table 1")
 
@@ -127,6 +148,8 @@ Total                              44.60
 }
 
 func TestSaveBill(t *testing.T) {
+	testProductsRepo := productRepository.NewLocalProductRepository(mocks.GetMockProductsCopy())
+
 	bill := NewBill(testProductsRepo, testTermimalPrinter, testBillConfig)
 
 	//make bills folder and cleanup at the end with defer
