@@ -27,19 +27,19 @@ func TestAddProduct(t *testing.T) {
 	bill.AddProduct("1", 2)
 	assert.Equal(t, 1, len(bill.GetProducts()))
 	assert.Equal(t, "1", bill.GetProducts()[0].Id)
-	assert.Equal(t, 2, bill.GetProducts()[0].Quantity)
+	assert.Equal(t, 2.0, bill.GetProducts()[0].Quantity)
 
 	// Test adding the same product again
 	bill.AddProduct("1", 3)
 	assert.Equal(t, 1, len(bill.GetProducts()))
 	assert.Equal(t, "1", bill.GetProducts()[0].Id)
-	assert.Equal(t, 5, bill.GetProducts()[0].Quantity)
+	assert.Equal(t, 5.0, bill.GetProducts()[0].Quantity)
 
 	// Test adding another valid product
 	bill.AddProduct("2", 1)
 	assert.Equal(t, 2, len(bill.GetProducts()))
 	assert.Equal(t, "2", bill.GetProducts()[1].Id)
-	assert.Equal(t, 1, bill.GetProducts()[1].Quantity)
+	assert.Equal(t, 1.0, bill.GetProducts()[1].Quantity)
 
 	// Test adding an invalid product
 	bill.AddProduct("4", 1)
@@ -57,7 +57,7 @@ func TestRemoveProduct(t *testing.T) {
 	// Test removing a valid product with quantity less than existing
 	bill.RemoveProduct("1", 2)
 	assert.Equal(t, 3, len(bill.GetProducts()))
-	assert.Equal(t, 2, bill.GetProducts()[0].Quantity)
+	assert.Equal(t, 2.0, bill.GetProducts()[0].Quantity)
 
 	// Test removing a valid product with quantity equal to existing
 	bill.RemoveProduct("2", 45)
