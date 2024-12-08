@@ -37,3 +37,26 @@ func (repo *LocalProductRepository) IsProductValid(id string) bool {
 
 	return index != -1
 }
+
+// is enough stock
+func (repo *LocalProductRepository) IsEnoughProductInStock(id string, desiredQuantity float64) bool {
+	product, error := repo.GetProductById(id)
+
+	if error != nil {
+		fmt.Println(error.Error())
+		return false
+	}
+
+	return product.Stock >= desiredQuantity
+}
+
+func (repo *LocalProductRepository) UpdateStock(id string, quantity float64) {
+	product, error := repo.GetProductById(id)
+
+	if error != nil {
+		fmt.Println(error.Error())
+		return
+	}
+
+	product.Stock += quantity
+}
