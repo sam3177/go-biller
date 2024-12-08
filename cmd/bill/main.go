@@ -4,6 +4,7 @@ import (
 	"biller/pkg/actionsMenuHandler"
 	"biller/pkg/bill"
 	"biller/pkg/inputHandler"
+	"biller/pkg/inputReader"
 	"biller/pkg/inputValidator"
 	"biller/pkg/printer"
 	"biller/pkg/productRepository"
@@ -26,7 +27,7 @@ func main() {
 	)
 
 	inputValidator := inputValidator.NewInputValidator()
-	inputReader := inputHandler.NewInputReader(bufio.NewReader(os.Stdin))
+	inputReader := inputReader.NewInputReader(bufio.NewReader(os.Stdin))
 
 	inputHandler := inputHandler.NewInputHandler(
 		inputReader,
