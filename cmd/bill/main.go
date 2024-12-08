@@ -14,7 +14,7 @@ import (
 )
 
 func main() {
-	productRepo := productRepository.NewLocalProductRepository(productRepository.ProductsCatalog)
+	productRepo := productRepository.NewLocalProductRepository(productRepository.MakeProductsCatalog(productRepository.ProductsSlice))
 	termimalPrinter := printer.NewTerminalPrinter()
 
 	bill := bill.NewBill(
