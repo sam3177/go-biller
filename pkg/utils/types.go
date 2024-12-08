@@ -37,7 +37,7 @@ type Product struct {
 // bills
 type BillItem struct {
 	Id       string
-	Quantity int
+	Quantity float64
 }
 
 type BillConfig struct {
@@ -57,7 +57,7 @@ type InputValidatorInterface interface {
 // input handler
 type InputHandlerInterface interface {
 	GetTableName() string
-	GetBillItem([]Product, string) (string, int)
+	GetBillItem([]Product, string) (string, float64)
 	GetTip() float64
 }
 
