@@ -42,10 +42,16 @@ func (bill *Bill) SetTableName(name string) {
 func (bill *Bill) AddProduct(id string, quantity float64) {
 	if !bill.ProductRepo.IsProductValid(id) {
 		fmt.Printf("Product with ID %v is not a valid product in the system.", id)
-
 		return
 	}
 	if quantity <= 0 {
+		return
+	}
+
+	removeFromStockError := bill.ProductRepo.UpdateStock(id, quantity*-1)
+
+	if removeFromStockError != nil {
+		fmt.Println(removeFromStockError)
 		return
 	}
 

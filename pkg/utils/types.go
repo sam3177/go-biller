@@ -13,8 +13,7 @@ type PrinterInterface interface {
 type ProductRepositoryInterface interface {
 	GetProducts() []Product
 	GetProductById(string) (*Product, error)
-	UpdateStock(string, float64)
-	IsEnoughProductInStock(string, float64) bool
+	UpdateStock(string, float64) error
 	IsProductValid(string) bool
 }
 
