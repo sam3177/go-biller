@@ -74,8 +74,23 @@ func TestIsEnoughProductInStock(t *testing.T) {
 func TestUpdateStock(t *testing.T) {
 	repo := NewLocalProductRepository(mocks.MockProducts)
 
-	repo.UpdateStock("1", 5)
-	product, _ := repo.GetProductById("1")
+	tests := []struct {
+		id       string
+		quantity float64
+		expected float64
+	}{
+		{"2", 199.56, 30}, // it required only integer quantity, so it fails
+		{"2", 30.0, 60.0},
+		{"4", 3, 999},
+	}
 
-	assert.Equal(t, 45.0, product.Stock)
+	for _, test := range tests {
+		repo.UpdateStock(test.id, test.quantity)
+		product, error := repo.GetProductById(test.id)
+		if error != nil {
+			assert.Error(t, error)
+		} else {
+			assert.Equal(t, test.expected, product.Stock)
+		}
+	}
 }

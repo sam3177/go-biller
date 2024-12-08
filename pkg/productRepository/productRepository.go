@@ -3,6 +3,7 @@ package productRepository
 import (
 	"biller/pkg/utils"
 	"fmt"
+	"math"
 	"slices"
 )
 
@@ -38,7 +39,6 @@ func (repo *LocalProductRepository) IsProductValid(id string) bool {
 	return index != -1
 }
 
-// is enough stock
 func (repo *LocalProductRepository) IsEnoughProductInStock(id string, desiredQuantity float64) bool {
 	product, error := repo.GetProductById(id)
 
@@ -58,5 +58,21 @@ func (repo *LocalProductRepository) UpdateStock(id string, quantity float64) {
 		return
 	}
 
+	if !repo.CanProductHaveDecimalStock(id) && quantity != math.Floor(quantity) {
+		fmt.Println("This product is sold by piece, so you can not ask for a decimal point quantity.")
+		return
+	}
+
 	product.Stock += quantity
+}
+
+func (repo *LocalProductRepository) CanProductHaveDecimalStock(id string) bool {
+	product, error := repo.GetProductById(id)
+
+	if error != nil {
+		fmt.Println(error.Error())
+		return false
+	}
+
+	return product.UnitType == utils.UnitKg
 }
