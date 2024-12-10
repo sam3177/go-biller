@@ -8,13 +8,24 @@ import (
 	"biller/pkg/inputValidator"
 	"biller/pkg/printer"
 	"biller/pkg/productRepository"
+	"biller/pkg/productsJsonStorageHandler"
 	"biller/pkg/utils"
 	"bufio"
+	"fmt"
 	"os"
 )
 
 func main() {
-	productRepo := productRepository.NewLocalProductRepository(productRepository.MakeProductsCatalog(productRepository.ProductsSlice))
+	productsJSONHandler := productsJsonStorageHandler.NewProductsJSONStorageHandler("./data/products.json")
+
+	error := productsJSONHandler.SeedJSONFile(productRepository.ProductsSeed)
+
+	if error != nil {
+		fmt.Println(error)
+	}
+
+	productRepo := productRepository.NewLocalProductRepository(productsJSONHandler)
+	
 	termimalPrinter := printer.NewTerminalPrinter()
 
 	bill := bill.NewBill(
