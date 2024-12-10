@@ -4,31 +4,65 @@ import (
 	"biller/pkg/utils"
 	"fmt"
 	"math"
-	"slices"
-
-	"github.com/google/uuid"
 )
 
 type LocalProductRepository struct {
-	products []utils.Product
+	dataHandler utils.ProductsStorageHandlerInterface
 }
 
-func NewProduct(
-	id string,
+func NewLocalProductRepository(
+	dataHandler utils.ProductsStorageHandlerInterface,
+) *LocalProductRepository {
+	return &LocalProductRepository{
+		dataHandler: dataHandler,
+	}
+}
+
+func (repo *LocalProductRepository) GetProducts() []utils.Product {
+	products, error := repo.dataHandler.GetAllProducts()
+
+	if error != nil {
+		fmt.Println(error)
+		return nil
+	}
+
+	return products
+}
+
+func (repo *LocalProductRepository) GetProductById(id string) (*utils.Product, error) {
+	product, error := repo.dataHandler.GetProduct(id)
+
+	if error != nil {
+		fmt.Println(error)
+		return nil, error
+	}
+
+	return product, nil
+}
+
+func (repo *LocalProductRepository) IsProductValid(id string) bool {
+	product, error := repo.GetProductById(id)
+
+	return product != nil && error == nil
+}
+
+func (repo *LocalProductRepository) IsEnoughProductInStock(id string, desiredQuantity float64) bool {
+	product, error := repo.GetProductById(id)
+
+	if error != nil {
+		fmt.Println(error.Error())
+		return false
+	}
+
+	return product.Stock >= desiredQuantity
+}
+
+func (repo *LocalProductRepository) AddProduct(
 	name string,
 	unitPrice float64,
 	unitType utils.UnitType,
 	stock float64,
 ) *utils.Product {
-
-	//id check
-	var productId string
-	if id != "" {
-		productId = id
-	} else {
-		productId = uuid.NewString()
-	}
-
 	// name check
 	if name == "" {
 		panic("Product name is mandatory.")
@@ -49,52 +83,19 @@ func NewProduct(
 		panic("Product stock must be 0 or greater.")
 	}
 
-	return &utils.Product{
-		Id:        productId,
+	newProduct, error := repo.dataHandler.AddProduct(utils.Product{
 		Name:      name,
 		UnitPrice: unitPrice,
 		UnitType:  unitType,
 		Stock:     stock,
-	}
-}
-
-func NewLocalProductRepository(products []utils.Product) *LocalProductRepository {
-	return &LocalProductRepository{products: products}
-}
-
-func (repo *LocalProductRepository) GetProducts() []utils.Product {
-	return repo.products
-}
-
-func (repo *LocalProductRepository) GetProductById(id string) (*utils.Product, error) {
-	index := slices.IndexFunc(repo.GetProducts(), func(product utils.Product) bool {
-		return product.Id == id
 	})
-
-	if index == -1 {
-		return nil, fmt.Errorf("product with ID %v not found", id)
-	}
-
-	return &repo.GetProducts()[index], nil
-}
-
-func (repo *LocalProductRepository) IsProductValid(id string) bool {
-	index := slices.IndexFunc(repo.GetProducts(), func(product utils.Product) bool {
-		return product.Id == id
-	})
-
-	return index != -1
-}
-
-func (repo *LocalProductRepository) IsEnoughProductInStock(id string, desiredQuantity float64) bool {
-	product, error := repo.GetProductById(id)
 
 	if error != nil {
-		fmt.Println(error.Error())
-		return false
+		fmt.Println(error)
+		return nil
 	}
 
-	return product.Stock >= desiredQuantity
+	return newProduct
 }
 
 func (repo *LocalProductRepository) UpdateStock(id string, quantity float64) error {
@@ -114,6 +115,8 @@ func (repo *LocalProductRepository) UpdateStock(id string, quantity float64) err
 	}
 
 	product.Stock += quantity
+
+	repo.dataHandler.UpdateProduct(*product)
 
 	return nil
 }

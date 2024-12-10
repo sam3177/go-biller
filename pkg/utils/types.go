@@ -15,6 +15,12 @@ type ProductRepositoryInterface interface {
 	GetProductById(string) (*Product, error)
 	UpdateStock(string, float64) error
 	IsProductValid(string) bool
+	AddProduct(
+		name string,
+		unitPrice float64,
+		unitType UnitType,
+		stock float64,
+	) *Product
 }
 
 // UnitType represents a type for product units
