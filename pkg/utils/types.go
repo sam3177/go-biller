@@ -26,11 +26,11 @@ const (
 )
 
 type Product struct {
-	Id        string
-	Name      string
-	UnitPrice float64
-	UnitType  UnitType
-	Stock     float64
+	Id        string   `json:"id"`
+	Name      string   `json:"name"`
+	UnitPrice float64  `json:"unitPrice"`
+	UnitType  UnitType `json:"unitType"`
+	Stock     float64  `json:"stock"`
 }
 
 // bills
@@ -62,4 +62,12 @@ type InputHandlerInterface interface {
 
 type InputReaderInterface interface {
 	GetInput(string) (string, error)
+}
+
+// Products Storage Handler
+type ProductsStorageHandlerInterface interface {
+	GetAllProducts() ([]Product, error)
+	GetProduct(string) (*Product, error)
+	UpdateProduct(Product) error
+	AddProduct(Product) (*Product, error)
 }
