@@ -1,0 +1,30 @@
+[
+  {
+    "id": "",
+    "name": "Banana",
+    "unitPrice": 1,
+    "unitType": "kg",
+    "stock": 40
+  },
+  {
+    "id": "",
+    "name": "Apple",
+    "unitPrice": 2,
+    "unitType": "kg",
+    "stock": 30
+  },
+  {
+    "id": "",
+    "name": "Orange",
+    "unitPrice": 3,
+    "unitType": "kg",
+    "stock": 10
+  },
+  {
+    "id": "",
+    "name": "Avocado",
+    "unitPrice": 2.19,
+    "unitType": "piece",
+    "stock": 34
+  }
+]
