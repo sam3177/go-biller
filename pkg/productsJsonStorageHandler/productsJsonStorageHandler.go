@@ -62,6 +62,9 @@ func (handler *ProductsJSONStorageHandler) writeProducts(products []utils.Produc
 		return fmt.Errorf("failed to serialize products: %w", err)
 	}
 
+	// Append a newline character
+	bytes = append(bytes, '\n')
+
 	if err := os.WriteFile(handler.FilePath, bytes, 0644); err != nil {
 		return fmt.Errorf("failed to write file: %w", err)
 	}
