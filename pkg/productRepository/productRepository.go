@@ -98,27 +98,31 @@ func (repo *LocalProductRepository) AddProduct(
 	return newProduct
 }
 
-func (repo *LocalProductRepository) UpdateStock(id string, quantity float64) error {
+func (repo *LocalProductRepository) UpdateStock(id string, quantity float64) (float64, error) {
 	product, error := repo.GetProductById(id)
 
 	if error != nil {
-		return error
+		return 0, error
 	}
 
 	if !repo.CanProductHaveDecimalStock(id) && quantity != math.Floor(quantity) {
-		return fmt.Errorf("this product is sold by piece, so a decimal point quantity is not valid in this case")
+		return 0, fmt.Errorf("this product is sold by piece, so a decimal point quantity is not valid in this case")
 	}
 
 	if quantity < 0 && !repo.IsEnoughProductInStock(id, quantity*-1) {
 
-		return fmt.Errorf("the available stock for this product is %f, but you requested %f", product.Stock, quantity*-1)
+		return 0, fmt.Errorf("the available stock for this product is %f, but you requested %f", product.Stock, quantity*-1)
 	}
 
 	product.Stock += quantity
 
-	repo.dataHandler.UpdateProduct(*product)
+	updateProductError := repo.dataHandler.UpdateProduct(*product)
 
-	return nil
+	if updateProductError != nil {
+		return 0, updateProductError
+	}
+
+	return product.Stock, nil
 }
 
 func (repo *LocalProductRepository) CanProductHaveDecimalStock(id string) bool {
