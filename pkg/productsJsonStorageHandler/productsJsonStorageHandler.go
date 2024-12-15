@@ -121,7 +121,14 @@ func (handler *ProductsJSONStorageHandler) SeedJSONFile(productsCatalog []utils.
 	if len(products) > 0 {
 		return fmt.Errorf("products list is already populated")
 	}
-	handler.writeProducts(productsCatalog)
+
+	productsToBeAdded := []utils.Product{}
+	for _, product := range productsCatalog {
+		product.Id = uuid.NewString()
+		productsToBeAdded = append(productsToBeAdded, product)
+	}
+
+	handler.writeProducts(productsToBeAdded)
 
 	return nil
 }
