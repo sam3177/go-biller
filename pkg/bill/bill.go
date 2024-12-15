@@ -48,7 +48,7 @@ func (bill *Bill) AddProduct(id string, quantity float64) {
 		return
 	}
 
-	removeFromStockError := bill.ProductRepo.UpdateStock(id, quantity*-1)
+	_, removeFromStockError := bill.ProductRepo.UpdateStock(id, quantity*-1)
 
 	if removeFromStockError != nil {
 		fmt.Println(removeFromStockError)
@@ -72,12 +72,29 @@ func (bill *Bill) RemoveProduct(id string, quantity float64) {
 		return
 	}
 
+	if quantity <= 0 {
+		return
+	}
+
 	for i, value := range bill.products {
 		if value.Id == id {
+			billQuantityIsGreaterThanRemoveQuantity := bill.products[i].Quantity > quantity
+			quantityToAddBackToDB := quantity
+			if !billQuantityIsGreaterThanRemoveQuantity {
+				quantityToAddBackToDB = bill.products[i].Quantity
+			}
+			_, addbackToStockError := bill.ProductRepo.UpdateStock(id, quantityToAddBackToDB)
+
+			if addbackToStockError != nil {
+				fmt.Println(addbackToStockError)
+				return
+			}
+
 			bill.products[i].Quantity -= quantity
 			if bill.products[i].Quantity <= 0 {
 				bill.products = append(bill.products[:i], bill.products[i+1:]...)
 			}
+
 			return
 		}
 	}
@@ -96,7 +113,7 @@ func (bill *Bill) CalculateTotal() float64 {
 
 	for _, value := range bill.products {
 		product, _ := bill.ProductRepo.GetProductById(value.Id)
-		total += float64(value.Quantity) * product.UnitPrice
+		total += value.Quantity * product.UnitPrice
 	}
 
 	return total
@@ -139,7 +156,6 @@ func (bill *Bill) FormatBill() string {
 			bill.BillRowLength/2,
 			totalCost,
 		)
-
 	}
 
 	formattedBill += dottedLine

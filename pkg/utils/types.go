@@ -13,8 +13,14 @@ type PrinterInterface interface {
 type ProductRepositoryInterface interface {
 	GetProducts() []Product
 	GetProductById(string) (*Product, error)
-	UpdateStock(string, float64) error
+	UpdateStock(string, float64) (float64, error)
 	IsProductValid(string) bool
+	AddProduct(
+		name string,
+		unitPrice float64,
+		unitType UnitType,
+		stock float64,
+	) *Product
 }
 
 // UnitType represents a type for product units
@@ -26,11 +32,11 @@ const (
 )
 
 type Product struct {
-	Id        string
-	Name      string
-	UnitPrice float64
-	UnitType  UnitType
-	Stock     float64
+	Id        string   `json:"id"`
+	Name      string   `json:"name"`
+	UnitPrice float64  `json:"unitPrice"`
+	UnitType  UnitType `json:"unitType"`
+	Stock     float64  `json:"stock"`
 }
 
 // bills
@@ -62,4 +68,12 @@ type InputHandlerInterface interface {
 
 type InputReaderInterface interface {
 	GetInput(string) (string, error)
+}
+
+// Products Storage Handler
+type ProductsStorageHandlerInterface interface {
+	GetAllProducts() ([]Product, error)
+	GetProduct(string) (*Product, error)
+	UpdateProduct(Product) error
+	AddProduct(Product) (*Product, error)
 }

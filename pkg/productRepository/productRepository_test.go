@@ -3,27 +3,32 @@ package productRepository
 import (
 	"biller/mocks"
 	"biller/pkg/utils"
+	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func TestGetProductById(t *testing.T) {
-	var repo = NewLocalProductRepository(mocks.MockProducts)
+	testProductsJsonStorageHandler := &mocks.ProductsJSONStorageHandlerMock{}
+	repo := NewLocalProductRepository(testProductsJsonStorageHandler)
 
 	tests := []struct {
-		id          string
-		expected    *utils.Product
-		expectError bool
+		id       string
+		expected *utils.Product
+		error    error
 	}{
-		{"1", &mocks.MockProducts[0], false},
-		{"2", &mocks.MockProducts[1], false},
-		{"4", nil, true},
+		{"1", &mocks.MockProducts[0], nil},
+		{"2", &mocks.MockProducts[1], nil},
+		{"4", nil, errors.New("")},
 	}
 
 	for _, test := range tests {
+		testProductsJsonStorageHandler.On("GetProduct", test.id).Return(test.expected, test.error).Once()
+
 		result, err := repo.GetProductById(test.id)
-		if test.expectError {
+		if test.error != nil {
 			assert.Error(t, err)
 			assert.Nil(t, result)
 		} else {
@@ -34,7 +39,8 @@ func TestGetProductById(t *testing.T) {
 }
 
 func TestIsProductValid(t *testing.T) {
-	repo := NewLocalProductRepository(mocks.MockProducts)
+	testProductsJsonStorageHandler := &mocks.ProductsJSONStorageHandlerMock{}
+	repo := NewLocalProductRepository(testProductsJsonStorageHandler)
 
 	tests := []struct {
 		id       string
@@ -46,125 +52,148 @@ func TestIsProductValid(t *testing.T) {
 	}
 
 	for _, test := range tests {
+		var err error = nil
+		if !test.expected {
+			err = errors.New("")
+		}
+		testProductsJsonStorageHandler.On("GetProduct", test.id).Return(&utils.Product{}, err).Once()
+
 		result := repo.IsProductValid(test.id)
 		assert.Equal(t, test.expected, result)
 	}
 }
 
 func TestIsEnoughProductInStock(t *testing.T) {
-	repo := NewLocalProductRepository(mocks.MockProducts)
+	testProductsJsonStorageHandler := &mocks.ProductsJSONStorageHandlerMock{}
+	repo := NewLocalProductRepository(testProductsJsonStorageHandler)
 
 	tests := []struct {
-		id       string
-		quantity float64
-		expected bool
+		productId    string
+		productStock float64
+		error        error
+		quantity     float64
+		expected     bool
 	}{
-		{"1", 30.0, true},
-		{"2", 199.0, false},
-		{"4", 3, false},
+		{"1", 40.0, nil, 30.0, true},
+		{"2", 30.0, nil, 199.0, false},
+		{"4", 3, errors.New(""), 5, false},
 	}
 
 	for _, test := range tests {
-		result := repo.IsEnoughProductInStock(test.id, test.quantity)
+		testProductsJsonStorageHandler.On("GetProduct", test.productId).Return(&utils.Product{Stock: test.productStock}, test.error).Once()
+
+		result := repo.IsEnoughProductInStock(test.productId, test.quantity)
 		assert.Equal(t, test.expected, result)
 	}
-
 }
 
-func TestUpdateStock(t *testing.T) {
-	repo := NewLocalProductRepository(mocks.MockProducts)
+func TestUpdateStock(t *testing.T) { // 			id:          "",
+	testProductsJsonStorageHandler := &mocks.ProductsJSONStorageHandlerMock{}
+	repo := NewLocalProductRepository(testProductsJsonStorageHandler)
 
 	tests := []struct {
-		id       string
-		quantity float64
-		expected float64
+		id             string
+		quantity       float64
+		initialStock   float64
+		expectedStock  float64
+		canHaveDecimal bool
+		expectedError  error
 	}{
-		{"2", 199.56, 30}, // it required only integer quantity, so it fails
-		{"2", 30.0, 60.0},
-		{"4", 3, 999},
+		{"1", 10.0, 20.0, 30.0, true, nil},
+		{"2", -5.0, 10.0, 5.0, true, nil},
+		{"3", 1.5, 10.0, 11.5, true, nil},
+		{"4", 1.5, 10.0, 10.0, false, fmt.Errorf("this product is sold by piece, so a decimal point quantity is not valid in this case")},
+		{"5", -15.0, 10.0, 10.0, true, fmt.Errorf("the available stock for this product is %f, but you requested %f", 10.0, 15.0)},
+		{"6", 5.0, 10.0, 15.0, false, nil},
 	}
 
 	for _, test := range tests {
-		repo.UpdateStock(test.id, test.quantity)
-		product, error := repo.GetProductById(test.id)
-		if error != nil {
-			assert.Error(t, error)
+		product := &utils.Product{
+			Id:       test.id,
+			Stock:    test.initialStock,
+			UnitType: utils.UnitPiece,
+		}
+		if test.canHaveDecimal {
+			product.UnitType = utils.UnitKg
+		}
+
+		testProductsJsonStorageHandler.On("GetProduct", test.id).Return(product, nil).Times(3)
+
+		updatedProduct := &utils.Product{
+			Id:       test.id,
+			Stock:    test.expectedStock,
+			UnitType: utils.UnitPiece,
+		}
+		if test.canHaveDecimal {
+			updatedProduct.UnitType = utils.UnitKg
+		}
+
+		if test.expectedError == nil {
+			testProductsJsonStorageHandler.On("UpdateProduct", *updatedProduct).Return(nil).Once()
+		}
+
+		newStock, err := repo.UpdateStock(test.id, test.quantity)
+		if test.expectedError != nil {
+			assert.Error(t, err)
+			assert.Equal(t, test.expectedError.Error(), err.Error())
 		} else {
-			assert.Equal(t, test.expected, product.Stock)
+			assert.NoError(t, err)
+			assert.Equal(t, test.expectedStock, newStock)
 		}
 	}
 }
 
-func TestNewProduct(t *testing.T) {
+func TestAddProduct(t *testing.T) {
+	testProductsJsonStorageHandler := &mocks.ProductsJSONStorageHandlerMock{}
+	repo := NewLocalProductRepository(testProductsJsonStorageHandler)
+
 	tests := []struct {
 		name        string
-		id          string
 		productName string
 		unitPrice   float64
 		unitType    interface{} // Allow UnitType to be any type for validation
 		stock       float64
 		expectPanic bool
-		expectedID  string
 	}{
 		{
 			name:        "Valid Inputs",
-			id:          "",
 			productName: "Apple",
 			unitPrice:   1.99,
 			unitType:    utils.UnitKg,
-			stock:       10,
+			stock:       10.0,
 			expectPanic: false,
-			expectedID:  "", // Expect a generated UUID
 		},
 		{
-			name:        "Custom ID",
-			id:          "aaa",
-			productName: "Orange",
-			unitPrice:   2.49,
-			unitType:    utils.UnitPiece,
-			stock:       5,
-			expectPanic: false,
-			expectedID:  "aaa", // Expect custom UUID passed in
-		},
-		{
-			name:        "Missing Name",
-			id:          "",
+			name:        "Missing Product Name",
 			productName: "",
 			unitPrice:   1.99,
 			unitType:    utils.UnitKg,
 			stock:       10,
 			expectPanic: true,
-			expectedID:  "",
 		},
 		{
 			name:        "Invalid UnitPrice",
-			id:          "",
 			productName: "Apple",
 			unitPrice:   -1,
 			unitType:    utils.UnitKg,
 			stock:       10,
 			expectPanic: true,
-			expectedID:  "",
 		},
 		{
 			name:        "Invalid UnitType",
-			id:          "",
 			productName: "Apple",
 			unitPrice:   1.99,
 			unitType:    "invalidType",
 			stock:       10,
 			expectPanic: true,
-			expectedID:  "",
 		},
 		{
 			name:        "Negative Stock",
-			id:          "",
 			productName: "Apple",
 			unitPrice:   1.99,
 			unitType:    utils.UnitKg,
 			stock:       -5,
 			expectPanic: true,
-			expectedID:  "",
 		},
 	}
 
@@ -180,18 +209,24 @@ func TestNewProduct(t *testing.T) {
 				}
 			}()
 
+			newProduct := utils.Product{
+				Name:      tt.productName,
+				UnitPrice: tt.unitPrice,
+				UnitType:  tt.unitType.(utils.UnitType),
+				Stock:     tt.stock,
+			}
+
+			if !tt.expectPanic {
+				testProductsJsonStorageHandler.On("AddProduct", utils.Product{
+					Name:      tt.productName,
+					UnitPrice: tt.unitPrice,
+					UnitType:  tt.unitType.(utils.UnitType),
+					Stock:     tt.stock,
+				}).Return(&newProduct, nil).Once()
+			}
+
 			// Call NewProduct with the current test case data
-			product := NewProduct(tt.id, tt.productName, tt.unitPrice, tt.unitType.(utils.UnitType), tt.stock)
-
-			if !tt.expectPanic && tt.expectedID == "" && product.Id == "" {
-				t.Errorf("Expected generated UUID, got empty string")
-			}
-
-			// Validate the expected ID if it's defined
-			if tt.expectedID != "" && product.Id != tt.expectedID {
-				t.Errorf("Expected Id '%s', got '%s'", tt.expectedID, product.Id)
-			}
-
+			product := repo.AddProduct(tt.productName, tt.unitPrice, tt.unitType.(utils.UnitType), tt.stock)
 			if product.Name != tt.productName {
 				t.Errorf("Expected Name '%s', got '%s'", tt.productName, product.Name)
 			}

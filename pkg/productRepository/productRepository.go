@@ -4,31 +4,65 @@ import (
 	"biller/pkg/utils"
 	"fmt"
 	"math"
-	"slices"
-
-	"github.com/google/uuid"
 )
 
 type LocalProductRepository struct {
-	products []utils.Product
+	dataHandler utils.ProductsStorageHandlerInterface
 }
 
-func NewProduct(
-	id string,
+func NewLocalProductRepository(
+	dataHandler utils.ProductsStorageHandlerInterface,
+) *LocalProductRepository {
+	return &LocalProductRepository{
+		dataHandler: dataHandler,
+	}
+}
+
+func (repo *LocalProductRepository) GetProducts() []utils.Product {
+	products, error := repo.dataHandler.GetAllProducts()
+
+	if error != nil {
+		fmt.Println(error)
+		return nil
+	}
+
+	return products
+}
+
+func (repo *LocalProductRepository) GetProductById(id string) (*utils.Product, error) {
+	product, error := repo.dataHandler.GetProduct(id)
+
+	if error != nil {
+		fmt.Println(error)
+		return nil, error
+	}
+
+	return product, nil
+}
+
+func (repo *LocalProductRepository) IsProductValid(id string) bool {
+	product, error := repo.GetProductById(id)
+
+	return product != nil && error == nil
+}
+
+func (repo *LocalProductRepository) IsEnoughProductInStock(id string, desiredQuantity float64) bool {
+	product, error := repo.GetProductById(id)
+
+	if error != nil {
+		fmt.Println(error.Error())
+		return false
+	}
+
+	return product.Stock >= desiredQuantity
+}
+
+func (repo *LocalProductRepository) AddProduct(
 	name string,
 	unitPrice float64,
 	unitType utils.UnitType,
 	stock float64,
 ) *utils.Product {
-
-	//id check
-	var productId string
-	if id != "" {
-		productId = id
-	} else {
-		productId = uuid.NewString()
-	}
-
 	// name check
 	if name == "" {
 		panic("Product name is mandatory.")
@@ -49,73 +83,46 @@ func NewProduct(
 		panic("Product stock must be 0 or greater.")
 	}
 
-	return &utils.Product{
-		Id:        productId,
+	newProduct, error := repo.dataHandler.AddProduct(utils.Product{
 		Name:      name,
 		UnitPrice: unitPrice,
 		UnitType:  unitType,
 		Stock:     stock,
-	}
-}
-
-func NewLocalProductRepository(products []utils.Product) *LocalProductRepository {
-	return &LocalProductRepository{products: products}
-}
-
-func (repo *LocalProductRepository) GetProducts() []utils.Product {
-	return repo.products
-}
-
-func (repo *LocalProductRepository) GetProductById(id string) (*utils.Product, error) {
-	index := slices.IndexFunc(repo.GetProducts(), func(product utils.Product) bool {
-		return product.Id == id
 	})
 
-	if index == -1 {
-		return nil, fmt.Errorf("product with ID %v not found", id)
+	if error != nil {
+		fmt.Println(error)
+		return nil
 	}
 
-	return &repo.GetProducts()[index], nil
+	return newProduct
 }
 
-func (repo *LocalProductRepository) IsProductValid(id string) bool {
-	index := slices.IndexFunc(repo.GetProducts(), func(product utils.Product) bool {
-		return product.Id == id
-	})
-
-	return index != -1
-}
-
-func (repo *LocalProductRepository) IsEnoughProductInStock(id string, desiredQuantity float64) bool {
+func (repo *LocalProductRepository) UpdateStock(id string, quantity float64) (float64, error) {
 	product, error := repo.GetProductById(id)
 
 	if error != nil {
-		fmt.Println(error.Error())
-		return false
-	}
-
-	return product.Stock >= desiredQuantity
-}
-
-func (repo *LocalProductRepository) UpdateStock(id string, quantity float64) error {
-	product, error := repo.GetProductById(id)
-
-	if error != nil {
-		return error
+		return 0, error
 	}
 
 	if !repo.CanProductHaveDecimalStock(id) && quantity != math.Floor(quantity) {
-		return fmt.Errorf("this product is sold by piece, so a decimal point quantity is not valid in this case")
+		return 0, fmt.Errorf("this product is sold by piece, so a decimal point quantity is not valid in this case")
 	}
 
 	if quantity < 0 && !repo.IsEnoughProductInStock(id, quantity*-1) {
 
-		return fmt.Errorf("the available stock for this product is %f, but you requested %f", product.Stock, quantity*-1)
+		return 0, fmt.Errorf("the available stock for this product is %f, but you requested %f", product.Stock, quantity*-1)
 	}
 
 	product.Stock += quantity
 
-	return nil
+	updateProductError := repo.dataHandler.UpdateProduct(*product)
+
+	if updateProductError != nil {
+		return 0, updateProductError
+	}
+
+	return product.Stock, nil
 }
 
 func (repo *LocalProductRepository) CanProductHaveDecimalStock(id string) bool {

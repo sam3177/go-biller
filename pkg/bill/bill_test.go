@@ -3,8 +3,8 @@ package bill
 import (
 	"biller/mocks"
 	"biller/pkg/printer"
-	"biller/pkg/productRepository"
 	"biller/pkg/utils"
+	"errors"
 	"fmt"
 	"os"
 	"testing"
@@ -18,106 +18,286 @@ var testBillConfig = utils.BillConfig{
 }
 var testTermimalPrinter = printer.NewTerminalPrinter()
 
-func TestAddProduct(t *testing.T) {
-	testProductsRepo := productRepository.NewLocalProductRepository(mocks.GetMockProductsCopy())
+func findProductByID(products []utils.BillItem, id string) *utils.BillItem {
+	for _, product := range products {
+		if product.Id == id {
+			return &product
+		}
+	}
+	return nil
+}
 
+func TestAddProduct(t *testing.T) {
+	testProductsRepo := &mocks.ProductRepositoryMock{}
 	bill := NewBill(testProductsRepo, testTermimalPrinter, testBillConfig)
 
-	// Test adding a valid product
-	bill.AddProduct("1", 2)
-	assert.Equal(t, 1, len(bill.GetProducts()))
-	assert.Equal(t, "1", bill.GetProducts()[0].Id)
-	assert.Equal(t, 2.0, bill.GetProducts()[0].Quantity)
+	tests := []struct {
+		name              string
+		productID         string
+		quantity          float64
+		isProductValid    bool
+		updateStockReturn float64
+		updateStockError  error
+		expectedLength    int
+		expectedQuantity  float64
+		expectedError     bool
+	}{
+		{
+			name:              "Add valid product",
+			productID:         "1",
+			quantity:          2,
+			isProductValid:    true,
+			updateStockReturn: 5.0,
+			updateStockError:  nil,
+			expectedLength:    1,
+			expectedQuantity:  2,
+		},
+		{
+			name:              "Add same product again",
+			productID:         "1",
+			quantity:          3,
+			isProductValid:    true,
+			updateStockReturn: 5.0,
+			updateStockError:  nil,
+			expectedLength:    1,
+			expectedQuantity:  5,
+		},
+		{
+			name:              "Add another valid product",
+			productID:         "2",
+			quantity:          1,
+			isProductValid:    true,
+			updateStockReturn: 10.0,
+			updateStockError:  nil,
+			expectedLength:    2,
+			expectedQuantity:  1,
+		},
+		{
+			name:              "Add product with floating point quantity (unitType kg)",
+			productID:         "3",
+			quantity:          5.56,
+			isProductValid:    true,
+			updateStockReturn: 15.0,
+			updateStockError:  nil,
+			expectedLength:    3,
+			expectedQuantity:  5.56,
+		},
+		{
+			name:              "Add product with floating point quantity (unitType piece, fails)",
+			productID:         "2",
+			quantity:          5.56,
+			isProductValid:    true,
+			updateStockReturn: 0,
+			updateStockError:  fmt.Errorf("this product is sold by piece, so a decimal point quantity is not valid in this case"),
+			expectedLength:    3,
+			expectedQuantity:  1, // No change
+		},
+		{
+			name:              "Add valid product but quantity exceeds stock (fails)",
+			productID:         "2",
+			quantity:          999,
+			isProductValid:    true,
+			updateStockReturn: 0,
+			updateStockError:  fmt.Errorf("the available stock for this product is whatever, but you requested 999"),
+			expectedLength:    3,
+			expectedQuantity:  1, // No change
+		},
+		{
+			name:              "Add invalid product",
+			productID:         "4",
+			quantity:          1,
+			isProductValid:    false,
+			updateStockReturn: 0,
+			updateStockError:  nil,
+			expectedLength:    3, // No change
+			expectedQuantity:  0,
+		},
+	}
 
-	product, _ := bill.ProductRepo.GetProductById("1")
-	assert.Equal(t, 38.0, product.Stock)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Arrange: set expectations
+			testProductsRepo.On("IsProductValid", tt.productID).Return(tt.isProductValid).Once()
+			if tt.isProductValid {
+				testProductsRepo.On("UpdateStock", tt.productID, -tt.quantity).Return(tt.updateStockReturn, tt.updateStockError).Once()
+			}
 
-	// Test adding the same product again
-	bill.AddProduct("1", 3)
-	assert.Equal(t, 1, len(bill.GetProducts()))
-	assert.Equal(t, "1", bill.GetProducts()[0].Id)
-	assert.Equal(t, 5.0, bill.GetProducts()[0].Quantity)
-	assert.Equal(t, 35.0, product.Stock)
+			// Act
+			bill.AddProduct(tt.productID, tt.quantity)
 
-	// Test adding another valid product
-	bill.AddProduct("2", 1)
-	assert.Equal(t, 2, len(bill.GetProducts()))
+			// Assert
+			assert.Equal(t, tt.expectedLength, len(bill.GetProducts()))
+			if tt.expectedLength > 0 {
+				product := findProductByID(bill.GetProducts(), tt.productID)
+				if product != nil {
+					assert.Equal(t, tt.expectedQuantity, product.Quantity)
+				}
+			}
 
-	// Test adding a product with unitType kg, and floating point quantity (succeeds)
-	bill.AddProduct("3", 5.56)
-	assert.Equal(t, 5.56, bill.GetProducts()[2].Quantity)
+			// Verify mock expectations
+			testProductsRepo.AssertExpectations(t)
+		})
+	}
+}
 
-	// Test adding a product with unitType piece, but floating point quantity (fails)
-	bill.AddProduct("2", 5.56)
-	assert.Equal(t, 1.0, bill.GetProducts()[1].Quantity)
+func populateBillWithProducts(bill *Bill, testProductsRepo *mocks.ProductRepositoryMock) {
+	productsToAdd := []struct {
+		productId string
+		quantity  float64
+	}{
+		{
+			productId: "1",
+			quantity:  4,
+		},
+		{
+			productId: "2",
+			quantity:  5,
+		},
+		{
+			productId: "3",
+			quantity:  7,
+		},
+	}
 
-	//Test adding a valid product, but with a quantity greater than stock (fails)
-	bill.AddProduct("2", 999)
-	assert.Equal(t, 1.0, bill.GetProducts()[1].Quantity)
+	for _, product := range productsToAdd {
+		testProductsRepo.On("IsProductValid", product.productId).Return(true).Once()
+		testProductsRepo.On("UpdateStock", product.productId, -product.quantity).Return(45.5, nil).Once()
 
-	// Test adding an invalid product
-	bill.AddProduct("4", 1)
-	assert.Equal(t, 3, len(bill.GetProducts())) // No change in length
+		bill.AddProduct(product.productId, product.quantity)
+	}
+}
+
+func mockGetProductByIdForAddedProducts(bill *Bill, testProductsRepo *mocks.ProductRepositoryMock) {
+	repoProducts := []utils.Product{
+		{Name: "Product 1", UnitPrice: 4.0, UnitType: "kg"},
+		{Name: "Product 2", UnitPrice: 4.2, UnitType: "kg"},
+		{Name: "Product 3", UnitPrice: 34.1, UnitType: "kg"},
+	} // 4, 5, 7
+	for idx, product := range bill.products {
+		testProductsRepo.On("GetProductById", product.Id).Return(
+			&repoProducts[idx], nil).Once()
+	}
 }
 
 func TestRemoveProduct(t *testing.T) {
-	testProductsRepo := productRepository.NewLocalProductRepository(mocks.GetMockProductsCopy())
-	fmt.Println("test remove", mocks.MockProducts)
-
+	testProductsRepo := &mocks.ProductRepositoryMock{}
 	bill := NewBill(testProductsRepo, testTermimalPrinter, testBillConfig)
 
-	// Add 3 products to the bill
-	bill.AddProduct("1", 4)
-	bill.AddProduct("2", 5)
-	bill.AddProduct("3", 7)
+	// Arrange: Add initial products to the bill
+	populateBillWithProducts(bill, testProductsRepo)
 
-	// Test removing a valid product with quantity less than existing
-	bill.RemoveProduct("1", 2)
-	assert.Equal(t, 3, len(bill.GetProducts()))
-	assert.Equal(t, 2.0, bill.GetProducts()[0].Quantity)
+	// Define test cases
+	tests := []struct {
+		name                  string
+		productID             string
+		quantity              float64
+		expectedLength        int
+		expectedQuantity      float64
+		quantityToAddBackToDB float64
+		isProductValid        bool
+		error                 error
+	}{
+		{
+			name:                  "Remove valid product with quantity less than existing",
+			productID:             "1",
+			quantity:              2.0,
+			expectedLength:        3,
+			expectedQuantity:      2.0,
+			quantityToAddBackToDB: 2.0,
+			isProductValid:        true,
+		},
+		{
+			name:                  "Remove valid product with quantity equal to existing",
+			productID:             "2",
+			quantity:              5.0,
+			expectedLength:        2,
+			expectedQuantity:      0, // Product should be removed
+			quantityToAddBackToDB: 5.0,
+			isProductValid:        true,
+		},
+		{
+			name:                  "Remove valid product with quantity more than existing",
+			productID:             "3",
+			quantity:              10.0,
+			expectedLength:        1,
+			expectedQuantity:      0, // Product should be removed
+			quantityToAddBackToDB: 7.0,
+			isProductValid:        true,
+		},
+		{
+			name:                  "Remove invalid product",
+			productID:             "4",
+			quantity:              1.0,
+			expectedLength:        1, // No change
+			expectedQuantity:      0,
+			quantityToAddBackToDB: 0,
+			isProductValid:        false,
+			error:                 errors.New(""),
+		},
+		{
+			name:                  "Remove valid product not in bill",
+			productID:             "2",
+			quantity:              1.0,
+			expectedLength:        1, // No change
+			expectedQuantity:      0,
+			quantityToAddBackToDB: 0,
+			isProductValid:        false,
+			error:                 errors.New(""),
+		},
+	}
 
-	// Test removing a valid product with quantity equal to existing
-	bill.RemoveProduct("2", 45)
-	assert.Equal(t, 2, len(bill.GetProducts()))
+	// Execute test cases
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Arrange: set expectations
+			testProductsRepo.On("IsProductValid", tt.productID).Return(tt.isProductValid).Once()
+			if tt.isProductValid {
+				testProductsRepo.On("UpdateStock", tt.productID, tt.quantityToAddBackToDB).Return(tt.expectedQuantity, tt.error).Once()
+			}
+			// Act
+			bill.RemoveProduct(tt.productID, tt.quantity)
 
-	// Test removing a valid product with quantity more than existing
-	bill.RemoveProduct("3", 10)
-	assert.Equal(t, 1, len(bill.GetProducts()))
+			// Assert
+			assert.Equal(t, tt.expectedLength, len(bill.GetProducts()))
 
-	// Test removing an invalid product
-	bill.RemoveProduct("4", 1)
-	assert.Equal(t, 1, len(bill.GetProducts())) // No change in length
+			if tt.expectedLength > 0 {
+				product := findProductByID(bill.GetProducts(), tt.productID)
+				if product != nil {
+					assert.Equal(t, tt.expectedQuantity, product.Quantity)
+				}
+			}
+		})
+	}
 
-	// Test removing a valid product that does not exist in the bill
-	bill.RemoveProduct("2", 1)
-	assert.Equal(t, 1, len(bill.GetProducts())) // No change in length
 }
 
 func TestCalculateTotal(t *testing.T) {
-	testProductsRepo := productRepository.NewLocalProductRepository(mocks.GetMockProductsCopy())
-
+	testProductsRepo := &mocks.ProductRepositoryMock{}
 	bill := NewBill(testProductsRepo, testTermimalPrinter, testBillConfig)
 
-	bill.AddProduct("1", 4)
-	bill.AddProduct("2", 3)
-	bill.AddProduct("3", 1)
+	// Arrange: Add initial products to the bill
+	populateBillWithProducts(bill, testProductsRepo)
+
+	mockGetProductByIdForAddedProducts(bill, testProductsRepo)
 
 	// Calculate the total
 	total := bill.CalculateTotal()
 
 	// Assert the expected total
-	assert.Equal(t, 13.0, total)
+	assert.Equal(t, 275.7, total)
 }
 
 func TestFormatBill(t *testing.T) {
-	testProductsRepo := productRepository.NewLocalProductRepository(mocks.GetMockProductsCopy())
-
+	testProductsRepo := &mocks.ProductRepositoryMock{}
 	bill := NewBill(testProductsRepo, testTermimalPrinter, testBillConfig)
 	bill.SetTableName("Table 1")
 
-	// Add some products to the bill
-	bill.AddProduct("1", 4)
-	bill.AddProduct("2", 3)
+	// Arrange: Add initial products to the bill
+	populateBillWithProducts(bill, testProductsRepo)
+	mockGetProductByIdForAddedProducts(bill, testProductsRepo)
+	// do it 2 more times because makeTotal will be called 2 times inside format fn
+	mockGetProductByIdForAddedProducts(bill, testProductsRepo)
+	mockGetProductByIdForAddedProducts(bill, testProductsRepo)
 
 	// Set the tip
 	bill.SetTip(34.6)
@@ -129,26 +309,27 @@ func TestFormatBill(t *testing.T) {
 Table name: Table 1 
 ----------------------------------------
 Product 1
-            4 X 1.00                4.00 
+            4 X 4.00               16.00 
 Product 2
-            3 X 2.00                6.00 
+            5 X 4.20               21.00 
+Product 3
+           7 X 34.10              238.70 
 ----------------------------------------
 
-Subtotal                           10.00 
+Subtotal                          275.70 
 
 Tip                                34.60 
 ----------------------------------------
 
-Total                              44.60 
+Total                             310.30 
 
 `
-
 	// Assert the expected formatted bill
 	assert.Equal(t, expectedText, formattedBill)
 }
 
 func TestSaveBill(t *testing.T) {
-	testProductsRepo := productRepository.NewLocalProductRepository(mocks.GetMockProductsCopy())
+	testProductsRepo := &mocks.ProductRepositoryMock{}
 
 	bill := NewBill(testProductsRepo, testTermimalPrinter, testBillConfig)
 
