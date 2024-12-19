@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"slices"
 
@@ -35,7 +36,7 @@ func (handler *ProductsJSONStorageHandler) GetAllProducts() ([]utils.Product, er
 
 	var products []utils.Product
 	if err := json.Unmarshal(bytes, &products); err != nil {
-		return nil, fmt.Errorf("failed to parse JSON: %w", err)
+		log.Fatalf("failed to parse JSON: %w", err)
 	}
 
 	return products, nil

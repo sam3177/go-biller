@@ -1,30 +1,30 @@
 [
   {
-    "id": "947174a1-94e3-4ae8-aeb9-46416e1c547a",
+    "id": "5cde4b12-afc2-42d9-a1fa-723759e95953",
     "name": "Banana",
     "unitPrice": 1,
     "unitType": "kg",
-    "stock": 40
+    "stock": 37
   },
   {
-    "id": "ba7be889-0cba-4d17-8709-f379d1a801dc",
+    "id": "8e3fdb8b-8aa7-46a4-a506-5c8cee423411",
     "name": "Apple",
     "unitPrice": 2,
     "unitType": "kg",
-    "stock": 30
+    "stock": 29
   },
   {
-    "id": "20663374-bf6b-41e4-83f5-99901e817d34",
+    "id": "e6ac66a3-e4b5-48bd-9670-2b310196cf32",
     "name": "Orange",
     "unitPrice": 3,
     "unitType": "kg",
-    "stock": 10
+    "stock": 5.44
   },
   {
-    "id": "7fda65f5-c836-435b-a730-8ad6156cb070",
+    "id": "5a022dd4-5253-4b43-9cd3-9919a2921110",
     "name": "Avocado",
     "unitPrice": 2.19,
     "unitType": "piece",
-    "stock": 34
+    "stock": 32
   }
 ]
