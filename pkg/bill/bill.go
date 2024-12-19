@@ -1,9 +1,9 @@
 package bill
 
 import (
+	"bytes"
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/google/uuid"
 
@@ -18,18 +18,21 @@ type Bill struct {
 	tip         float64
 	ProductRepo utils.ProductRepositoryInterface
 	Printer     utils.PrinterInterface
+	Formatter   utils.BillFormatterInterface
 	utils.BillConfig
 }
 
 func NewBill(
 	productRepo utils.ProductRepositoryInterface,
 	printer utils.PrinterInterface,
+	formatter utils.BillFormatterInterface,
 	config utils.BillConfig,
 ) *Bill {
 	return &Bill{
 		products:    []utils.BillItem{},
 		tip:         0,
 		ProductRepo: productRepo,
+		Formatter:   formatter,
 		BillConfig:  config,
 		Printer:     printer,
 	}
@@ -119,65 +122,46 @@ func (bill *Bill) CalculateTotal() float64 {
 	return total
 }
 
-func (bill *Bill) FormatBill() string {
-	makeFooterLine := func(name string, amount float64) string {
-		newLine := "\n" + name
-
-		formattedAmount := fmt.Sprintf("%0.2f", amount)
-		newLine += fmt.Sprintf("%*v \n",
-			bill.BillRowLength-len(name),
-			formattedAmount,
-		)
-
-		return newLine
-	}
-
-	billTitle := "----Bill----"
-	dottedLine := strings.Repeat("-", bill.BillRowLength) + "\n"
-	formattedBill := fmt.Sprintf("%*s \n", (bill.BillRowLength+len(billTitle))/2, billTitle)
-
-	formattedBill += fmt.Sprintf("Table name: %v \n", bill.tableName)
-	formattedBill += dottedLine
+func (bill *Bill) FormatBill() bytes.Buffer {
+	products := []utils.ProductWithQuantityFromBill{}
 
 	for _, value := range bill.products {
 		product, _ := bill.ProductRepo.GetProductById(value.Id)
 
-		formattedBill += fmt.Sprintf(product.Name + "\n")
-
-		formattedQuantityTimesUnitPrice := fmt.Sprintf("%*s",
-			bill.BillRowLength/2,
-			fmt.Sprintf("%v X %0.2f", value.Quantity, product.UnitPrice),
-		)
-
-		formattedBill += formattedQuantityTimesUnitPrice
-
-		totalCost := fmt.Sprintf("%0.2f", float64(value.Quantity)*product.UnitPrice)
-		formattedBill += fmt.Sprintf("%*v \n",
-			bill.BillRowLength/2,
-			totalCost,
-		)
+		products = append(products, utils.ProductWithQuantityFromBill{
+			Product:  *product,
+			Quantity: value.Quantity,
+		})
+	}
+	// Create a BillData DTO
+	billData := utils.BillData{
+		TableName: bill.tableName,
+		Products:  products,
+		Tip:       bill.tip,
+		Subtotal:  bill.CalculateTotal(),
+		Total:     bill.CalculateTotal() + bill.tip,
 	}
 
-	formattedBill += dottedLine
-	formattedBill += makeFooterLine("Subtotal", bill.CalculateTotal())
-	formattedBill += makeFooterLine("Tip", bill.tip)
-	formattedBill += dottedLine
-	formattedBill += makeFooterLine("Total", bill.CalculateTotal()+bill.tip)
-	formattedBill += "\n"
+	formattedBill := bill.Formatter.FormatBill(billData, bill.Printer.GetRowLength())
 
 	return formattedBill
 }
 
 func (bill *Bill) PrintBill() {
-	bill.Printer.Print(bill.FormatBill())
+	formattedBill := bill.FormatBill()
+
+	// Print the formatted bill
+	bill.Printer.Print(formattedBill)
+
 }
 
 func (bill *Bill) SaveBill() string {
-	data := []byte(bill.FormatBill())
+	data := bill.FormatBill()
 
+	// TODO: problems on saved file if using the printer formatter
 	fileName := "table_" + bill.tableName + "_" + uuid.NewString() + ".txt"
 
-	error := os.WriteFile(bill.BillsDir+"/"+fileName, data, 0644)
+	error := os.WriteFile(bill.BillsDir+"/"+fileName, data.Bytes(), 0644)
 
 	if error != nil {
 		fmt.Println("Error", error)

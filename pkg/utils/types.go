@@ -1,12 +1,15 @@
 package utils
 
+import "bytes"
+
 type GetValidNumberFromInputOptions struct {
 	ShouldBePositive bool
 }
 
 // printer
 type PrinterInterface interface {
-	Print(data string)
+	Print(data bytes.Buffer)
+	GetRowLength() int
 }
 
 // productss
@@ -39,7 +42,21 @@ type Product struct {
 	Stock     float64  `json:"stock"`
 }
 
+type ProductWithQuantityFromBill struct {
+	Product
+	Quantity float64
+}
+
 // bills
+
+type BillData struct {
+	TableName string
+	Products  []ProductWithQuantityFromBill
+	Tip       float64
+	Subtotal  float64
+	Total     float64
+}
+
 type BillItem struct {
 	Id       string
 	Quantity float64
@@ -76,4 +93,9 @@ type ProductsStorageHandlerInterface interface {
 	GetProduct(string) (*Product, error)
 	UpdateProduct(Product) error
 	AddProduct(Product) (*Product, error)
+}
+
+// Bill Formatter
+type BillFormatterInterface interface {
+	FormatBill(billData BillData, rowLength int) bytes.Buffer
 }
