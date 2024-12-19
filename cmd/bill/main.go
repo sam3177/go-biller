@@ -3,6 +3,7 @@ package main
 import (
 	"biller/pkg/actionsMenuHandler"
 	"biller/pkg/bill"
+	"biller/pkg/billFormatter"
 	"biller/pkg/inputHandler"
 	"biller/pkg/inputReader"
 	"biller/pkg/inputValidator"
@@ -29,9 +30,12 @@ func main() {
 	// termimalPrinter := printer.NewTerminalPrinter()
 	epsonPrinter := printer.NewEpsonPrinter("EPSON_TM_T20III")
 
+	EpsonPrinterFormatter := billFormatter.NewBillEpsonPrinterFormatter()
+
 	bill := bill.NewBill(
 		productRepo,
 		epsonPrinter,
+		EpsonPrinterFormatter,
 		utils.BillConfig{
 			BillsDir:      utils.GetBillsDir(),
 			BillRowLength: utils.BILL_ROW_LENGTH,
