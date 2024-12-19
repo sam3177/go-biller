@@ -36,7 +36,7 @@ func (handler *ProductsJSONStorageHandler) GetAllProducts() ([]utils.Product, er
 
 	var products []utils.Product
 	if err := json.Unmarshal(bytes, &products); err != nil {
-		log.Fatalf("failed to parse JSON: %w", err)
+		log.Fatal("failed to parse JSON: %w", err)
 	}
 
 	return products, nil
