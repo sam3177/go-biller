@@ -62,11 +62,6 @@ type BillItem struct {
 	Quantity float64
 }
 
-type BillConfig struct {
-	BillsDir      string
-	BillRowLength int
-}
-
 // input validator
 type InputValidatorInterface interface {
 	ValidateFloat(string) bool

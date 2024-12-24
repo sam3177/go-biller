@@ -36,10 +36,7 @@ func main() {
 		productRepo,
 		epsonPrinter,
 		epsonPrinterFormatter,
-		utils.BillConfig{
-			BillsDir:      utils.GetBillsDir(),
-			BillRowLength: utils.BILL_ROW_LENGTH,
-		},
+		utils.GetBillsDir(),
 	)
 
 	inputValidator := inputValidator.NewInputValidator()

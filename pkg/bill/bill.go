@@ -19,22 +19,22 @@ type Bill struct {
 	ProductRepo utils.ProductRepositoryInterface
 	Printer     utils.PrinterInterface
 	Formatter   utils.BillFormatterInterface
-	utils.BillConfig
+	BillsDir    string
 }
 
 func NewBill(
 	productRepo utils.ProductRepositoryInterface,
 	printer utils.PrinterInterface,
 	formatter utils.BillFormatterInterface,
-	config utils.BillConfig,
+	billsDir string,
 ) *Bill {
 	return &Bill{
 		products:    []utils.BillItem{},
 		tip:         0,
 		ProductRepo: productRepo,
 		Formatter:   formatter,
-		BillConfig:  config,
 		Printer:     printer,
+		BillsDir:    billsDir,
 	}
 }
 
