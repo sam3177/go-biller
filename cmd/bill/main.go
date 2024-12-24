@@ -27,7 +27,7 @@ func main() {
 
 	productRepo := productRepository.NewLocalProductRepository(productsJSONHandler)
 
-	// termimalPrinter := printer.NewTerminalPrinter()
+	// termimalPrinter := printer.NewTerminalPrinter(50)
 	epsonPrinter := printer.NewEpsonPrinter("EPSON_TM_T20III")
 
 	epsonPrinterFormatter := billFormatter.NewBillEpsonPrinterFormatter()

@@ -13,7 +13,6 @@ import (
 // TODO: date on the bill
 
 type Bill struct {
-	tableName   string
 	products    []utils.BillItem
 	ProductRepo utils.ProductRepositoryInterface
 	Printer     utils.PrinterInterface
@@ -34,10 +33,6 @@ func NewBill(
 		Printer:     printer,
 		BillsDir:    billsDir,
 	}
-}
-
-func (bill *Bill) SetTableName(name string) {
-	bill.tableName = name
 }
 
 func (bill *Bill) AddProduct(id string, quantity float64) {
@@ -129,9 +124,8 @@ func (bill *Bill) FormatBill() bytes.Buffer {
 	}
 	// Create a BillData DTO
 	billData := utils.BillData{
-		TableName: bill.tableName,
-		Products:  products,
-		Subtotal:  bill.CalculateTotal(),
+		Products: products,
+		Subtotal: bill.CalculateTotal(),
 		//VAT to be added in the future
 		Total: bill.CalculateTotal(),
 	}
@@ -153,7 +147,7 @@ func (bill *Bill) SaveBill() string {
 	data := bill.FormatBill()
 
 	// TODO: problems on saved file if using the printer formatter
-	fileName := "table_" + bill.tableName + "_" + uuid.NewString() + ".txt"
+	fileName := "bill_" + uuid.NewString() + ".txt"
 
 	error := os.WriteFile(bill.BillsDir+"/"+fileName, data.Bytes(), 0644)
 
