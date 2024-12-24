@@ -44,7 +44,6 @@ func (menuHandler *ActionsMenuHandler) HandleActions() {
 
 	promptItems := []string{
 		utils.BILL_ACTIONS["addProduct"],
-		utils.BILL_ACTIONS["addTip"],
 		utils.BILL_ACTIONS["printBill"],
 		utils.BILL_ACTIONS["saveAndExit"],
 		utils.BILL_ACTIONS["exit"],
@@ -75,11 +74,6 @@ func (menuHandler *ActionsMenuHandler) executeAction(action string) {
 		name, quantity := menuHandler.inputHandler.GetBillItem(products, "remove")
 		menuHandler.bill.RemoveProduct(name, quantity)
 		fmt.Println(menuHandler.bill.GetProducts())
-
-	case utils.BILL_ACTIONS["addTip"]:
-		tip := menuHandler.inputHandler.GetTip()
-		menuHandler.bill.SetTip(tip)
-		fmt.Println(menuHandler.bill)
 
 	case utils.BILL_ACTIONS["printBill"]:
 		menuHandler.bill.PrintBill()

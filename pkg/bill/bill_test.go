@@ -13,10 +13,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var testBillConfig = utils.BillConfig{
-	BillsDir:      "./bills",
-	BillRowLength: utils.BILL_ROW_LENGTH,
-}
 var testTermimalPrinter = printer.NewTerminalPrinter(utils.BILL_ROW_LENGTH)
 
 var testFormatter = billFormatter.NewBillTerminalFormatter()
@@ -32,7 +28,7 @@ func findProductByID(products []utils.BillItem, id string) *utils.BillItem {
 
 func TestAddProduct(t *testing.T) {
 	testProductsRepo := &mocks.ProductRepositoryMock{}
-	bill := NewBill(testProductsRepo, testTermimalPrinter, testFormatter, testBillConfig)
+	bill := NewBill(testProductsRepo, testTermimalPrinter, testFormatter, "./bills")
 
 	tests := []struct {
 		name              string
@@ -184,7 +180,7 @@ func mockGetProductByIdForAddedProducts(bill *Bill, testProductsRepo *mocks.Prod
 
 func TestRemoveProduct(t *testing.T) {
 	testProductsRepo := &mocks.ProductRepositoryMock{}
-	bill := NewBill(testProductsRepo, testTermimalPrinter, testFormatter, testBillConfig)
+	bill := NewBill(testProductsRepo, testTermimalPrinter, testFormatter, "./bills")
 
 	// Arrange: Add initial products to the bill
 	populateBillWithProducts(bill, testProductsRepo)
@@ -276,7 +272,7 @@ func TestRemoveProduct(t *testing.T) {
 
 func TestCalculateTotal(t *testing.T) {
 	testProductsRepo := &mocks.ProductRepositoryMock{}
-	bill := NewBill(testProductsRepo, testTermimalPrinter, testFormatter, testBillConfig)
+	bill := NewBill(testProductsRepo, testTermimalPrinter, testFormatter, "./bills")
 
 	// Arrange: Add initial products to the bill
 	populateBillWithProducts(bill, testProductsRepo)
@@ -292,7 +288,7 @@ func TestCalculateTotal(t *testing.T) {
 
 // func TestFormatBill(t *testing.T) {
 // 	testProductsRepo := &mocks.ProductRepositoryMock{}
-// 	bill := NewBill(testProductsRepo, testTermimalPrinter,testFormatter, testBillConfig)
+// 	bill := NewBill(testProductsRepo, testTermimalPrinter,testFormatter,"./bills")
 // 	bill.SetTableName("Table 1")
 
 // 	// Arrange: Add initial products to the bill
@@ -334,7 +330,7 @@ func TestCalculateTotal(t *testing.T) {
 func TestSaveBill(t *testing.T) {
 	testProductsRepo := &mocks.ProductRepositoryMock{}
 
-	bill := NewBill(testProductsRepo, testTermimalPrinter, testFormatter, testBillConfig)
+	bill := NewBill(testProductsRepo, testTermimalPrinter, testFormatter, "./bills")
 
 	//make bills folder and cleanup at the end with defer
 	os.Mkdir("bills", 0755)

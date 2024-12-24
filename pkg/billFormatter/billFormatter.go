@@ -24,13 +24,19 @@ func (formatter *BillFormatter) makeDottedLine(rowLength int) string {
 	return strings.Repeat("-", rowLength) + "\n"
 }
 
-func (formatter *BillFormatter) formatSubtotalAndTip(billData utils.BillData, rowLength int) string {
-	footer := ""
-	footer += formatter.makeFooterLine("Subtotal", billData.Subtotal, rowLength)
-	footer += formatter.makeFooterLine("Tip", billData.Tip, rowLength)
-	footer += formatter.makeDottedLine(rowLength)
+func (formatter *BillFormatter) formatSubtotal(subtotal float64, rowLength int) string {
+	subtotalRow := ""
+	subtotalRow += formatter.makeFooterLine("Subtotal", subtotal, rowLength)
+	subtotalRow += formatter.makeDottedLine(rowLength)
 
-	return footer
+	return subtotalRow
+}
+
+func (formatter *BillFormatter) formatTotal(total float64, rowLength int) string {
+	totalRow := ""
+	totalRow += formatter.makeFooterLine("Total", total, rowLength)
+
+	return totalRow
 }
 
 func (formatter *BillFormatter) formatBillProduct(billProduct utils.ProductWithQuantityFromBill, rowLength int) string {

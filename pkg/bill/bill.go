@@ -15,26 +15,24 @@ import (
 type Bill struct {
 	tableName   string
 	products    []utils.BillItem
-	tip         float64
 	ProductRepo utils.ProductRepositoryInterface
 	Printer     utils.PrinterInterface
 	Formatter   utils.BillFormatterInterface
-	utils.BillConfig
+	BillsDir    string
 }
 
 func NewBill(
 	productRepo utils.ProductRepositoryInterface,
 	printer utils.PrinterInterface,
 	formatter utils.BillFormatterInterface,
-	config utils.BillConfig,
+	billsDir string,
 ) *Bill {
 	return &Bill{
 		products:    []utils.BillItem{},
-		tip:         0,
 		ProductRepo: productRepo,
 		Formatter:   formatter,
-		BillConfig:  config,
 		Printer:     printer,
+		BillsDir:    billsDir,
 	}
 }
 
@@ -107,10 +105,6 @@ func (bill *Bill) GetProducts() []utils.BillItem {
 	return bill.products
 }
 
-func (bill *Bill) SetTip(tip float64) {
-	bill.tip = tip
-}
-
 func (bill *Bill) CalculateTotal() float64 {
 	var total float64 = 0
 
@@ -137,9 +131,9 @@ func (bill *Bill) FormatBill() bytes.Buffer {
 	billData := utils.BillData{
 		TableName: bill.tableName,
 		Products:  products,
-		Tip:       bill.tip,
 		Subtotal:  bill.CalculateTotal(),
-		Total:     bill.CalculateTotal() + bill.tip,
+		//VAT to be added in the future
+		Total: bill.CalculateTotal(),
 	}
 
 	formattedBill := bill.Formatter.FormatBill(billData, bill.Printer.GetRowLength())
