@@ -27,11 +27,11 @@ func (formatter *BillEpsonPrinterFormatter) FormatBill(billData utils.BillData, 
 
 	formatter.makeSeparator(rowLength)
 
-	formatter.buffer.WriteString(formatter.formatSubtotalAndTip(billData, rowLength))
+	formatter.buffer.WriteString(formatter.formatSubtotal(billData.Subtotal, rowLength))
 
 	formatter.enableBold()
 
-	formatter.buffer.WriteString(formatter.makeFooterLine("Total", billData.Total, rowLength))
+	formatter.buffer.WriteString(formatter.formatTotal(billData.Total, rowLength))
 
 	formatter.buffer.Write([]byte{0x1B, 0x64, 0x06}) // Feed 6 lines
 	formatter.buffer.Write([]byte{0x1D, 0x56, 0x00}) // Cut the paper

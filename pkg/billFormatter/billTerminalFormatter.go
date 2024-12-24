@@ -30,9 +30,9 @@ func (formatter *BillTerminalFormatter) FormatBill(billData utils.BillData, rowL
 
 	buffer.WriteString(formatter.makeDottedLine(rowLength))
 
-	buffer.WriteString(formatter.formatSubtotalAndTip(billData, rowLength))
+	buffer.WriteString(formatter.formatSubtotal(billData.Subtotal, rowLength))
 
-	buffer.WriteString(formatter.makeFooterLine("Total", billData.Total, rowLength))
+	buffer.WriteString(formatter.formatTotal(billData.Total, rowLength))
 
 	return buffer
 }
