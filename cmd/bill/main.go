@@ -1,26 +1,55 @@
 package main
 
 import (
+	"biller/pkg/actionsMenuHandler"
 	"biller/pkg/bill"
-	"biller/pkg/cli"
+	"biller/pkg/billFormatter"
 	"biller/pkg/inputHandler"
+	"biller/pkg/inputReader"
+	"biller/pkg/inputValidator"
+	"biller/pkg/printer"
 	"biller/pkg/productRepository"
+	"biller/pkg/productsJsonStorageHandler"
 	"biller/pkg/utils"
+	"bufio"
+	"fmt"
+	"os"
 )
 
 func main() {
-	productRepo := productRepository.NewLocalProductRepository(productRepository.ProductsCatalog)
+	productsJSONHandler := productsJsonStorageHandler.NewProductsJSONStorageHandler("./data/products.json")
 
-	tableName := inputHandler.GetTableName()
+	error := productsJSONHandler.SeedJSONFile(productRepository.ProductsSeed)
+
+	if error != nil {
+		fmt.Println(error)
+	}
+
+	productRepo := productRepository.NewLocalProductRepository(productsJSONHandler)
+
+	// termimalPrinter := printer.NewTerminalPrinter()
+	epsonPrinter := printer.NewEpsonPrinter("EPSON_TM_T20III")
+
+	epsonPrinterFormatter := billFormatter.NewBillEpsonPrinterFormatter()
 
 	bill := bill.NewBill(
-		tableName,
 		productRepo,
-		utils.BillConfig{
-			BillsDir:      utils.GetBillsDir(),
-			BillRowLength: utils.BILL_ROW_LENGTH,
-		},
+		epsonPrinter,
+		epsonPrinterFormatter,
+		utils.GetBillsDir(),
 	)
 
-	cli.HandleActionsOnBill(bill, productRepo)
+	inputValidator := inputValidator.NewInputValidator()
+	inputReader := inputReader.NewInputReader(bufio.NewReader(os.Stdin))
+
+	inputHandler := inputHandler.NewInputHandler(
+		inputReader,
+		inputValidator,
+	)
+
+	actionsMenu := actionsMenuHandler.NewActionMenuHandler(
+		bill, inputHandler,
+	)
+
+	actionsMenu.HandleActions()
 }
