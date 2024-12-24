@@ -30,12 +30,12 @@ func main() {
 	// termimalPrinter := printer.NewTerminalPrinter()
 	epsonPrinter := printer.NewEpsonPrinter("EPSON_TM_T20III")
 
-	EpsonPrinterFormatter := billFormatter.NewBillEpsonPrinterFormatter()
+	epsonPrinterFormatter := billFormatter.NewBillEpsonPrinterFormatter()
 
 	bill := bill.NewBill(
 		productRepo,
 		epsonPrinter,
-		EpsonPrinterFormatter,
+		epsonPrinterFormatter,
 		utils.BillConfig{
 			BillsDir:      utils.GetBillsDir(),
 			BillRowLength: utils.BILL_ROW_LENGTH,
