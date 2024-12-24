@@ -20,14 +20,13 @@ func (formatter *BillFormatter) makeFooterLine(name string, amount float64, rowL
 
 	return newLine
 }
-func (formatter *BillFormatter) makeDottedLine(rowLength int) string {
+func (formatter *BillFormatter) makeLineSeparator(rowLength int) string {
 	return strings.Repeat("-", rowLength) + "\n"
 }
 
 func (formatter *BillFormatter) formatSubtotal(subtotal float64, rowLength int) string {
 	subtotalRow := ""
 	subtotalRow += formatter.makeFooterLine("Subtotal", subtotal, rowLength)
-	subtotalRow += formatter.makeDottedLine(rowLength)
 
 	return subtotalRow
 }

@@ -38,9 +38,6 @@ func (menuHandler *ActionsMenuHandler) selectAction(actions []string, hasProduct
 }
 
 func (menuHandler *ActionsMenuHandler) HandleActions() {
-	tableName := menuHandler.inputHandler.GetTableName()
-
-	menuHandler.bill.SetTableName(tableName)
 
 	promptItems := []string{
 		utils.BILL_ACTIONS["addProduct"],

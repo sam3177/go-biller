@@ -3,7 +3,6 @@ package billFormatter
 import (
 	"biller/pkg/utils"
 	"bytes"
-	"fmt"
 )
 
 type BillEpsonPrinterFormatter struct {
@@ -19,15 +18,17 @@ func (formatter *BillEpsonPrinterFormatter) FormatBill(billData utils.BillData, 
 	formatter.buffer.Write([]byte{0x1B, 0x40})             // ESC @ (initialize)
 	formatter.buffer.Write([]byte{0x1D, 0x4C, 0x0A, 0x00}) // 10 dots left margin (1 character width)
 
-	formatter.makeBillHeader(billData.TableName, rowLength)
+	formatter.makeBillHeader(rowLength)
 
 	for _, product := range billData.Products {
 		formatter.buffer.WriteString(formatter.formatBillProduct(product, rowLength))
 	}
 
-	formatter.makeSeparator(rowLength)
+	formatter.buffer.WriteString(formatter.makeLineSeparator(rowLength))
 
 	formatter.buffer.WriteString(formatter.formatSubtotal(billData.Subtotal, rowLength))
+
+	formatter.buffer.WriteString(formatter.makeLineSeparator(rowLength))
 
 	formatter.enableBold()
 
@@ -39,7 +40,7 @@ func (formatter *BillEpsonPrinterFormatter) FormatBill(billData utils.BillData, 
 	return formatter.buffer
 }
 
-func (formatter *BillEpsonPrinterFormatter) makeBillHeader(tableName string, rowLength int) {
+func (formatter *BillEpsonPrinterFormatter) makeBillHeader(rowLength int) {
 	formatter.alignCenter()
 	formatter.enableBold()
 	formatter.buffer.Write([]byte{0x1D, 0x21, 0x11}) // Double width and height font
@@ -51,8 +52,7 @@ func (formatter *BillEpsonPrinterFormatter) makeBillHeader(tableName string, row
 	formatter.disableBold()
 	formatter.buffer.Write([]byte{0x1D, 0x21, 0x00}) // Reset font size
 
-	formatter.buffer.WriteString(fmt.Sprintf("Table name: %v \n", tableName))
-	formatter.makeSeparator(rowLength)
+	formatter.buffer.WriteString(formatter.makeLineSeparator(rowLength))
 }
 
 func (formatter *BillEpsonPrinterFormatter) alignCenter() {
@@ -69,8 +69,4 @@ func (formatter *BillEpsonPrinterFormatter) enableBold() {
 
 func (formatter *BillEpsonPrinterFormatter) disableBold() {
 	formatter.buffer.Write([]byte{0x1B, 0x45, 0x00}) // ESC E 0 - Disable bold
-}
-
-func (formatter *BillEpsonPrinterFormatter) makeSeparator(rowLength int) {
-	formatter.buffer.WriteString(formatter.makeDottedLine(rowLength))
 }

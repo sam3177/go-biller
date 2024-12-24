@@ -50,11 +50,10 @@ type ProductWithQuantityFromBill struct {
 // bills
 
 type BillData struct {
-	TableName string
-	Products  []ProductWithQuantityFromBill
-	Tip       float64
-	Subtotal  float64
-	Total     float64
+	Products []ProductWithQuantityFromBill
+	Tip      float64
+	Subtotal float64
+	Total    float64
 }
 
 type BillItem struct {

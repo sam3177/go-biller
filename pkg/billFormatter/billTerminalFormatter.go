@@ -8,6 +8,7 @@ import (
 
 type BillTerminalFormatter struct {
 	BillFormatter
+	buffer bytes.Buffer
 }
 
 func NewBillTerminalFormatter() *BillTerminalFormatter {
@@ -15,24 +16,22 @@ func NewBillTerminalFormatter() *BillTerminalFormatter {
 }
 
 func (formatter *BillTerminalFormatter) FormatBill(billData utils.BillData, rowLength int) bytes.Buffer {
-	var buffer bytes.Buffer
-
 	billTitle := formatter.getBillTitle()
-	buffer.WriteString(fmt.Sprintf("%*s", (rowLength+len(billTitle))/2, billTitle))
+	formatter.buffer.WriteString(fmt.Sprintf("%*s", (rowLength+len(billTitle))/2, billTitle))
 
-	buffer.WriteString(fmt.Sprintf("Table name: %v \n", billData.TableName))
-
-	buffer.WriteString(formatter.makeDottedLine(rowLength))
+	formatter.buffer.WriteString(formatter.makeLineSeparator(rowLength))
 
 	for _, product := range billData.Products {
-		buffer.WriteString(formatter.formatBillProduct(product, rowLength))
+		formatter.buffer.WriteString(formatter.formatBillProduct(product, rowLength))
 	}
 
-	buffer.WriteString(formatter.makeDottedLine(rowLength))
+	formatter.buffer.WriteString(formatter.makeLineSeparator(rowLength))
 
-	buffer.WriteString(formatter.formatSubtotal(billData.Subtotal, rowLength))
+	formatter.buffer.WriteString(formatter.formatSubtotal(billData.Subtotal, rowLength))
 
-	buffer.WriteString(formatter.formatTotal(billData.Total, rowLength))
+	formatter.buffer.WriteString(formatter.makeLineSeparator(rowLength))
 
-	return buffer
+	formatter.buffer.WriteString(formatter.formatTotal(billData.Total, rowLength))
+
+	return formatter.buffer
 }
