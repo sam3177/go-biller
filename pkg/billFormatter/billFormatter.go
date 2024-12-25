@@ -6,8 +6,7 @@ import (
 	"strings"
 )
 
-type BillFormatter struct {
-}
+type BillFormatter struct{}
 
 func (formatter *BillFormatter) makeFooterLine(name string, amount float64, rowLength int) string {
 	newLine := name
@@ -20,6 +19,7 @@ func (formatter *BillFormatter) makeFooterLine(name string, amount float64, rowL
 
 	return newLine
 }
+
 func (formatter *BillFormatter) makeLineSeparator(rowLength int) string {
 	return strings.Repeat("-", rowLength) + "\n"
 }
@@ -54,6 +54,7 @@ func (formatter *BillFormatter) formatBillProduct(billProduct utils.ProductWithQ
 		rowLength/2,
 		totalCost,
 	)
+
 	return formattedProduct
 }
 

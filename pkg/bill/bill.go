@@ -111,7 +111,7 @@ func (bill *Bill) CalculateTotal() float64 {
 	return total
 }
 
-func (bill *Bill) FormatBill() bytes.Buffer {
+func (bill *Bill) getProductsWithInfosForFormatter() []utils.ProductWithQuantityFromBill {
 	products := []utils.ProductWithQuantityFromBill{}
 
 	for _, value := range bill.products {
@@ -122,9 +122,15 @@ func (bill *Bill) FormatBill() bytes.Buffer {
 			Quantity: value.Quantity,
 		})
 	}
+
+	return products
+}
+
+func (bill *Bill) FormatBill() bytes.Buffer {
+
 	// Create a BillData DTO
 	billData := utils.BillData{
-		Products: products,
+		Products: bill.getProductsWithInfosForFormatter(),
 		Subtotal: bill.CalculateTotal(),
 		//VAT to be added in the future
 		Total: bill.CalculateTotal(),
@@ -140,7 +146,6 @@ func (bill *Bill) PrintBill() {
 
 	// Print the formatted bill
 	bill.Printer.Print(formattedBill)
-
 }
 
 func (bill *Bill) SaveBill() string {

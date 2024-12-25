@@ -27,15 +27,16 @@ func main() {
 
 	productRepo := productRepository.NewLocalProductRepository(productsJSONHandler)
 
-	// termimalPrinter := printer.NewTerminalPrinter(50)
-	epsonPrinter := printer.NewEpsonPrinter("EPSON_TM_T20III")
+	// epsonPrinter := printer.NewEpsonPrinter("EPSON_TM_T20III")
+	termimalPrinter := printer.NewTerminalPrinter(50)
 
-	epsonPrinterFormatter := billFormatter.NewBillEpsonPrinterFormatter()
+	// epsonPrinterFormatter := billFormatter.NewBillEpsonPrinterFormatter()
+	terminalPrinterFormatter := billFormatter.NewBillTerminalFormatter()
 
 	bill := bill.NewBill(
 		productRepo,
-		epsonPrinter,
-		epsonPrinterFormatter,
+		termimalPrinter,
+		terminalPrinterFormatter,
 		utils.GetBillsDir(),
 	)
 
