@@ -51,14 +51,30 @@ type ProductWithQuantityFromBill struct {
 
 type BillData struct {
 	Products []ProductWithQuantityFromBill
-	Tip      float64
 	Subtotal float64
 	Total    float64
 }
 
-type BillItem struct {
+type BillProduct struct {
 	Id       string
 	Quantity float64
+}
+
+type Bill struct {
+	Id       string        `json:"id"`
+	Products []BillProduct `json:"products"` // not ok, bill product repo needs to be put in place
+	Subtotal float64       `json:"subtotal"`
+	Total    float64       `json:"total"`
+}
+
+type BillRepositoryInterface interface {
+	GetBills() []Bill
+	GetBillById(string) (*Bill, error)
+	AddBill(
+		products []BillProduct,
+		subtotal float64,
+		total float64,
+	) *Bill
 }
 
 // input validator
@@ -72,9 +88,7 @@ type InputValidatorInterface interface {
 
 // input handler
 type InputHandlerInterface interface {
-	GetTableName() string
 	GetBillItem([]Product, string) (string, float64)
-	GetTip() float64
 }
 
 type InputReaderInterface interface {
@@ -92,4 +106,11 @@ type ProductsStorageHandlerInterface interface {
 // Bill Formatter
 type BillFormatterInterface interface {
 	FormatBill(billData BillData, rowLength int) bytes.Buffer
+}
+
+// Bill Storage Handler
+type BillStorageHandlerInterface interface {
+	GetAll() ([]Bill, error)
+	Get(string) (*Bill, error)
+	Add(Bill) (*Bill, error)
 }
