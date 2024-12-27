@@ -11,14 +11,14 @@ import (
 )
 
 type ActionsMenuHandler struct {
-	bill         *bill.Bill
-	inputHandler utils.InputHandlerInterface
+	billingHandler *bill.BillingHandler
+	inputHandler   utils.InputHandlerInterface
 }
 
-func NewActionMenuHandler(bill *bill.Bill, inputHandler *inputHandler.InputHandler) *ActionsMenuHandler {
+func NewActionMenuHandler(billingHandler *bill.BillingHandler, inputHandler *inputHandler.InputHandler) *ActionsMenuHandler {
 	return &ActionsMenuHandler{
-		bill:         bill,
-		inputHandler: inputHandler,
+		billingHandler: billingHandler,
+		inputHandler:   inputHandler,
 	}
 }
 
@@ -47,7 +47,7 @@ func (menuHandler *ActionsMenuHandler) HandleActions() {
 	}
 
 	for {
-		action, error := menuHandler.selectAction(promptItems, len(menuHandler.bill.GetProducts()) > 0)
+		action, error := menuHandler.selectAction(promptItems, len(menuHandler.billingHandler.GetProducts()) > 0)
 
 		if error != nil {
 			fmt.Printf("Prompt failed %v\n", error)
@@ -59,25 +59,25 @@ func (menuHandler *ActionsMenuHandler) HandleActions() {
 }
 
 func (menuHandler *ActionsMenuHandler) executeAction(action string) {
-	products := menuHandler.bill.ProductRepo.GetProducts()
+	products := menuHandler.billingHandler.ProductRepo.GetProducts()
 
 	switch action {
 	case utils.BILL_ACTIONS["addProduct"]:
 		name, quantity := menuHandler.inputHandler.GetBillItem(products, "add")
-		menuHandler.bill.AddProduct(name, quantity)
-		fmt.Println(menuHandler.bill.GetProducts())
+		menuHandler.billingHandler.AddProduct(name, quantity)
+		fmt.Println(menuHandler.billingHandler.GetProducts())
 
 	case utils.BILL_ACTIONS["removeProduct"]:
 		name, quantity := menuHandler.inputHandler.GetBillItem(products, "remove")
-		menuHandler.bill.RemoveProduct(name, quantity)
-		fmt.Println(menuHandler.bill.GetProducts())
+		menuHandler.billingHandler.RemoveProduct(name, quantity)
+		fmt.Println(menuHandler.billingHandler.GetProducts())
 
 	case utils.BILL_ACTIONS["printBill"]:
-		menuHandler.bill.PrintBill()
+		menuHandler.billingHandler.PrintBill()
 
 	case utils.BILL_ACTIONS["saveAndExit"]:
-		fileName := menuHandler.bill.SaveBill()
-		utils.OpenFileInVsCode(menuHandler.bill.BillsDir + "/" + fileName)
+		fileName := menuHandler.billingHandler.SaveBill()
+		utils.OpenFileInVsCode(menuHandler.billingHandler.BillsDir + "/" + fileName)
 		os.Exit(0)
 
 	case utils.BILL_ACTIONS["exit"]:

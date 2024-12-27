@@ -12,31 +12,34 @@ import (
 
 // TODO: date on the bill
 
-type Bill struct {
-	products    []utils.BillItem
+type BillingHandler struct {
+	products    []utils.BillProduct
 	ProductRepo utils.ProductRepositoryInterface
+	BillRepo    utils.BillRepositoryInterface
 	Printer     utils.PrinterInterface
 	Formatter   utils.BillFormatterInterface
 	BillsDir    string
 }
 
-func NewBill(
+func NewBillingHandler(
 	productRepo utils.ProductRepositoryInterface,
+	billRepo utils.BillRepositoryInterface,
 	printer utils.PrinterInterface,
 	formatter utils.BillFormatterInterface,
 	billsDir string,
-) *Bill {
-	return &Bill{
-		products:    []utils.BillItem{},
+) *BillingHandler {
+	return &BillingHandler{
+		products:    []utils.BillProduct{},
 		ProductRepo: productRepo,
+		BillRepo:    billRepo,
 		Formatter:   formatter,
 		Printer:     printer,
 		BillsDir:    billsDir,
 	}
 }
 
-func (bill *Bill) AddProduct(id string, quantity float64) {
-	if !bill.ProductRepo.IsProductValid(id) {
+func (billingHandler *BillingHandler) AddProduct(id string, quantity float64) {
+	if !billingHandler.ProductRepo.IsProductValid(id) {
 		fmt.Printf("Product with ID %v is not a valid product in the system.", id)
 		return
 	}
@@ -44,25 +47,25 @@ func (bill *Bill) AddProduct(id string, quantity float64) {
 		return
 	}
 
-	_, removeFromStockError := bill.ProductRepo.UpdateStock(id, quantity*-1)
+	_, removeFromStockError := billingHandler.ProductRepo.UpdateStock(id, quantity*-1)
 
 	if removeFromStockError != nil {
 		fmt.Println(removeFromStockError)
 		return
 	}
 
-	for i, value := range bill.products {
+	for i, value := range billingHandler.products {
 		if value.Id == id {
-			bill.products[i].Quantity += quantity
+			billingHandler.products[i].Quantity += quantity
 			return
 		}
 	}
 
-	bill.products = append(bill.products, utils.BillItem{Id: id, Quantity: quantity})
+	billingHandler.products = append(billingHandler.products, utils.BillProduct{Id: id, Quantity: quantity})
 }
 
-func (bill *Bill) RemoveProduct(id string, quantity float64) {
-	if !bill.ProductRepo.IsProductValid(id) {
+func (billingHandler *BillingHandler) RemoveProduct(id string, quantity float64) {
+	if !billingHandler.ProductRepo.IsProductValid(id) {
 		fmt.Printf("Product with ID %v is not a valid product in the system.", id)
 
 		return
@@ -72,23 +75,23 @@ func (bill *Bill) RemoveProduct(id string, quantity float64) {
 		return
 	}
 
-	for i, value := range bill.products {
+	for i, value := range billingHandler.products {
 		if value.Id == id {
-			billQuantityIsGreaterThanRemoveQuantity := bill.products[i].Quantity > quantity
+			billQuantityIsGreaterThanRemoveQuantity := billingHandler.products[i].Quantity > quantity
 			quantityToAddBackToDB := quantity
 			if !billQuantityIsGreaterThanRemoveQuantity {
-				quantityToAddBackToDB = bill.products[i].Quantity
+				quantityToAddBackToDB = billingHandler.products[i].Quantity
 			}
-			_, addbackToStockError := bill.ProductRepo.UpdateStock(id, quantityToAddBackToDB)
+			_, addbackToStockError := billingHandler.ProductRepo.UpdateStock(id, quantityToAddBackToDB)
 
 			if addbackToStockError != nil {
 				fmt.Println(addbackToStockError)
 				return
 			}
 
-			bill.products[i].Quantity -= quantity
-			if bill.products[i].Quantity <= 0 {
-				bill.products = append(bill.products[:i], bill.products[i+1:]...)
+			billingHandler.products[i].Quantity -= quantity
+			if billingHandler.products[i].Quantity <= 0 {
+				billingHandler.products = append(billingHandler.products[:i], billingHandler.products[i+1:]...)
 			}
 
 			return
@@ -96,11 +99,11 @@ func (bill *Bill) RemoveProduct(id string, quantity float64) {
 	}
 }
 
-func (bill *Bill) GetProducts() []utils.BillItem {
-	return bill.products
+func (billingHandler *BillingHandler) GetProducts() []utils.BillProduct {
+	return billingHandler.products
 }
 
-func (bill *Bill) CalculateTotal() float64 {
+func (bill *BillingHandler) CalculateTotal() float64 {
 	var total float64 = 0
 
 	for _, value := range bill.products {
@@ -111,11 +114,11 @@ func (bill *Bill) CalculateTotal() float64 {
 	return total
 }
 
-func (bill *Bill) getProductsWithInfosForFormatter() []utils.ProductWithQuantityFromBill {
+func (billingHandler *BillingHandler) getProductsWithInfosForFormatter() []utils.ProductWithQuantityFromBill {
 	products := []utils.ProductWithQuantityFromBill{}
 
-	for _, value := range bill.products {
-		product, _ := bill.ProductRepo.GetProductById(value.Id)
+	for _, value := range billingHandler.products {
+		product, _ := billingHandler.ProductRepo.GetProductById(value.Id)
 
 		products = append(products, utils.ProductWithQuantityFromBill{
 			Product:  *product,
@@ -126,39 +129,41 @@ func (bill *Bill) getProductsWithInfosForFormatter() []utils.ProductWithQuantity
 	return products
 }
 
-func (bill *Bill) FormatBill() bytes.Buffer {
+func (billingHandler *BillingHandler) FormatBill() bytes.Buffer {
 
 	// Create a BillData DTO
 	billData := utils.BillData{
-		Products: bill.getProductsWithInfosForFormatter(),
-		Subtotal: bill.CalculateTotal(),
+		Products: billingHandler.getProductsWithInfosForFormatter(),
+		Subtotal: billingHandler.CalculateTotal(),
 		//VAT to be added in the future
-		Total: bill.CalculateTotal(),
+		Total: billingHandler.CalculateTotal(),
 	}
 
-	formattedBill := bill.Formatter.FormatBill(billData, bill.Printer.GetRowLength())
+	formattedBill := billingHandler.Formatter.FormatBill(billData, billingHandler.Printer.GetRowLength())
 
 	return formattedBill
 }
 
-func (bill *Bill) PrintBill() {
-	formattedBill := bill.FormatBill()
+func (billingHandler *BillingHandler) PrintBill() {
+	formattedBill := billingHandler.FormatBill()
 
 	// Print the formatted bill
-	bill.Printer.Print(formattedBill)
+	billingHandler.Printer.Print(formattedBill)
 }
 
-func (bill *Bill) SaveBill() string {
-	data := bill.FormatBill()
+func (billingHandler *BillingHandler) SaveBill() string {
+	data := billingHandler.FormatBill()
 
 	// TODO: problems on saved file if using the printer formatter
 	fileName := "bill_" + uuid.NewString() + ".txt"
 
-	error := os.WriteFile(bill.BillsDir+"/"+fileName, data.Bytes(), 0644)
+	error := os.WriteFile(billingHandler.BillsDir+"/"+fileName, data.Bytes(), 0644)
+
+	billingHandler.BillRepo.AddBill(billingHandler.products, billingHandler.CalculateTotal(), billingHandler.CalculateTotal())
 
 	if error != nil {
 		fmt.Println("Error", error)
-		panic(error)
+		panic(error) // TODO: handle error, get rid of panic here
 	}
 
 	return fileName
