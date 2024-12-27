@@ -127,3 +127,26 @@ func (m *ProductRepositoryMock) CanProductHaveDecimalStock(id string) bool {
 	args := m.Called(id)
 	return args.Bool(0)
 }
+
+// bill repository
+type BillRepositoryMock struct {
+	mock.Mock
+}
+
+// Mock method for AddBill
+func (m *BillRepositoryMock) AddBill(products []utils.BillProduct, subtotal float64, total float64) *utils.Bill {
+	args := m.Called(products, subtotal, total)
+	return args.Get(0).(*utils.Bill)
+}
+
+// Mock method for GetBillById
+func (m *BillRepositoryMock) GetBillById(id string) (*utils.Bill, error) {
+	args := m.Called(id)
+	return args.Get(0).(*utils.Bill), args.Error(1)
+}
+
+// Mock method for GetBills
+func (m *BillRepositoryMock) GetBills() []utils.Bill {
+	args := m.Called()
+	return args.Get(0).([]utils.Bill)
+}
