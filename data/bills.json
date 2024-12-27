@@ -1,0 +1,28 @@
+[
+  {
+    "id": "a2131062-096a-40dc-a07d-a6b7ca089c27",
+    "products": [
+      {
+        "Id": "5cde4b12-afc2-42d9-a1fa-723759e95953",
+        "Quantity": 2
+      },
+      {
+        "Id": "e6ac66a3-e4b5-48bd-9670-2b310196cf32",
+        "Quantity": 2.45
+      }
+    ],
+    "subtotal": 9.350000000000001,
+    "total": 9.350000000000001
+  },
+  {
+    "id": "97aef4eb-93dd-4c48-a20b-d20b3c375e95",
+    "products": [
+      {
+        "Id": "5a022dd4-5253-4b43-9cd3-9919a2921110",
+        "Quantity": 22
+      }
+    ],
+    "subtotal": 48.18,
+    "total": 48.18
+  }
+]
