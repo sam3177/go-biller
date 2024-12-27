@@ -150,3 +150,27 @@ func (m *BillRepositoryMock) GetBills() []utils.Bill {
 	args := m.Called()
 	return args.Get(0).([]utils.Bill)
 }
+
+// bills JSON storage handler
+
+type BillsJSONStorageHandlerMock struct {
+	mock.Mock
+}
+
+func (m *BillsJSONStorageHandlerMock) GetAll() ([]utils.Bill, error) {
+	args := m.Called()
+
+	return args.Get(0).([]utils.Bill), args.Error(1)
+}
+
+func (m *BillsJSONStorageHandlerMock) Get(id string) (*utils.Bill, error) {
+	args := m.Called(id)
+
+	return args.Get(0).(*utils.Bill), args.Error(1)
+}
+
+func (m *BillsJSONStorageHandlerMock) Add(newBill utils.Bill) (*utils.Bill, error) {
+	args := m.Called(newBill)
+
+	return args.Get(0).(*utils.Bill), args.Error(1)
+}
