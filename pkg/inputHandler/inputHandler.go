@@ -45,20 +45,6 @@ func (handler *InputHandler) GetValidFloatFromInput(prompt string, options utils
 	return floatValue
 }
 
-func (handler *InputHandler) GetTableName() string {
-	tableName, error := handler.reader.GetInput("Please, type the table name: ")
-
-	if error != nil {
-		fmt.Println("Error:", error)
-	}
-
-	if !handler.validator.ValidateMinLength(tableName, 1) {
-		return handler.GetTableName()
-	}
-
-	return tableName
-}
-
 func (handler *InputHandler) getProductItem(products []utils.Product, action string) utils.Product {
 	var promptVariant string
 
@@ -85,10 +71,6 @@ func (handler *InputHandler) getProductItem(products []utils.Product, action str
 	i, _, _ := prompt.Run()
 
 	return products[i]
-}
-
-func (handler *InputHandler) GetTip() float64 {
-	return handler.GetValidFloatFromInput("Add the tip, please: ", utils.GetValidNumberFromInputOptions{ShouldBePositive: true})
 }
 
 func (handler *InputHandler) getBillItemQuantity(productName string, action string) float64 {

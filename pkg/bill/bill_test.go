@@ -17,7 +17,7 @@ var testTermimalPrinter = printer.NewTerminalPrinter(utils.BILL_ROW_LENGTH)
 
 var testFormatter = billFormatter.NewBillTerminalFormatter()
 
-func findProductByID(products []utils.BillItem, id string) *utils.BillItem {
+func findProductByID(products []utils.BillProduct, id string) *utils.BillProduct {
 	for _, product := range products {
 		if product.Id == id {
 			return &product
@@ -28,7 +28,8 @@ func findProductByID(products []utils.BillItem, id string) *utils.BillItem {
 
 func TestAddProduct(t *testing.T) {
 	testProductsRepo := &mocks.ProductRepositoryMock{}
-	bill := NewBill(testProductsRepo, testTermimalPrinter, testFormatter, "./bills")
+	testBillRepo := &mocks.BillRepositoryMock{}
+	bill := NewBillingHandler(testProductsRepo, testBillRepo, testTermimalPrinter, testFormatter, "./bills")
 
 	tests := []struct {
 		name              string
@@ -139,7 +140,7 @@ func TestAddProduct(t *testing.T) {
 	}
 }
 
-func populateBillWithProducts(bill *Bill, testProductsRepo *mocks.ProductRepositoryMock) {
+func populateBillWithProducts(bill *BillingHandler, testProductsRepo *mocks.ProductRepositoryMock) {
 	productsToAdd := []struct {
 		productId string
 		quantity  float64
@@ -166,7 +167,7 @@ func populateBillWithProducts(bill *Bill, testProductsRepo *mocks.ProductReposit
 	}
 }
 
-func mockGetProductByIdForAddedProducts(bill *Bill, testProductsRepo *mocks.ProductRepositoryMock) {
+func mockGetProductByIdForAddedProducts(bill *BillingHandler, testProductsRepo *mocks.ProductRepositoryMock) {
 	repoProducts := []utils.Product{
 		{Name: "Product 1", UnitPrice: 4.0, UnitType: "kg"},
 		{Name: "Product 2", UnitPrice: 4.2, UnitType: "kg"},
@@ -180,7 +181,8 @@ func mockGetProductByIdForAddedProducts(bill *Bill, testProductsRepo *mocks.Prod
 
 func TestRemoveProduct(t *testing.T) {
 	testProductsRepo := &mocks.ProductRepositoryMock{}
-	bill := NewBill(testProductsRepo, testTermimalPrinter, testFormatter, "./bills")
+	testBillRepo := &mocks.BillRepositoryMock{}
+	bill := NewBillingHandler(testProductsRepo, testBillRepo, testTermimalPrinter, testFormatter, "./bills")
 
 	// Arrange: Add initial products to the bill
 	populateBillWithProducts(bill, testProductsRepo)
@@ -272,7 +274,8 @@ func TestRemoveProduct(t *testing.T) {
 
 func TestCalculateTotal(t *testing.T) {
 	testProductsRepo := &mocks.ProductRepositoryMock{}
-	bill := NewBill(testProductsRepo, testTermimalPrinter, testFormatter, "./bills")
+	testBillRepo := &mocks.BillRepositoryMock{}
+	bill := NewBillingHandler(testProductsRepo, testBillRepo, testTermimalPrinter, testFormatter, "./bills")
 
 	// Arrange: Add initial products to the bill
 	populateBillWithProducts(bill, testProductsRepo)
@@ -288,8 +291,8 @@ func TestCalculateTotal(t *testing.T) {
 
 // func TestFormatBill(t *testing.T) {
 // 	testProductsRepo := &mocks.ProductRepositoryMock{}
-// 	bill := NewBill(testProductsRepo, testTermimalPrinter,testFormatter,"./bills")
-// 	bill.SetTableName("Table 1")
+// testBillRepo:= &mocks.BillRepositoryMock{}
+// 	bill := NewBill(testProductsRtestBillRepo,epo, testTermimalPrinter,testFormatter,"./bills")
 
 // 	// Arrange: Add initial products to the bill
 // 	populateBillWithProducts(bill, testProductsRepo)
@@ -297,9 +300,6 @@ func TestCalculateTotal(t *testing.T) {
 // 	// do it 2 more times because makeTotal will be called 2 times inside format fn
 // 	mockGetProductByIdForAddedProducts(bill, testProductsRepo)
 // 	mockGetProductByIdForAddedProducts(bill, testProductsRepo)
-
-// 	// Set the tip
-// 	bill.SetTip(34.6)
 
 // 	// Format the bill
 // 	formattedBill := bill.FormatBill()
@@ -314,10 +314,7 @@ func TestCalculateTotal(t *testing.T) {
 // Product 3
 //            7 X 34.10              238.70
 // ----------------------------------------
-
 // Subtotal                          275.70
-
-// Tip                                34.60
 // ----------------------------------------
 
 // Total                             310.30
@@ -329,12 +326,15 @@ func TestCalculateTotal(t *testing.T) {
 
 func TestSaveBill(t *testing.T) {
 	testProductsRepo := &mocks.ProductRepositoryMock{}
+	testBillRepo := &mocks.BillRepositoryMock{}
 
-	bill := NewBill(testProductsRepo, testTermimalPrinter, testFormatter, "./bills")
+	bill := NewBillingHandler(testProductsRepo, testBillRepo, testTermimalPrinter, testFormatter, "./bills")
 
 	//make bills folder and cleanup at the end with defer
 	os.Mkdir("bills", 0755)
 	defer os.RemoveAll(bill.BillsDir)
+
+	testBillRepo.On("AddBill", bill.products, bill.CalculateTotal(), bill.CalculateTotal()).Return(&utils.Bill{}).Once()
 
 	fileName := bill.SaveBill()
 

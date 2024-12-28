@@ -4,6 +4,8 @@ import (
 	"biller/pkg/actionsMenuHandler"
 	"biller/pkg/bill"
 	"biller/pkg/billFormatter"
+	"biller/pkg/billRepository"
+	"biller/pkg/billsJsonStorageHandler"
 	"biller/pkg/inputHandler"
 	"biller/pkg/inputReader"
 	"biller/pkg/inputValidator"
@@ -18,6 +20,7 @@ import (
 
 func main() {
 	productsJSONHandler := productsJsonStorageHandler.NewProductsJSONStorageHandler("./data/products.json")
+	billsJSONHandler := billsJsonStorageHandler.NewBillsJSONStorageHandler("./data/bills.json")
 
 	error := productsJSONHandler.SeedJSONFile(productRepository.ProductsSeed)
 
@@ -26,16 +29,19 @@ func main() {
 	}
 
 	productRepo := productRepository.NewLocalProductRepository(productsJSONHandler)
+	billRepo := billRepository.NewLocalBillRepository(billsJSONHandler)
 
-	// termimalPrinter := printer.NewTerminalPrinter(50)
-	epsonPrinter := printer.NewEpsonPrinter("EPSON_TM_T20III")
+	// epsonPrinter := printer.NewEpsonPrinter("EPSON_TM_T20III")
+	termimalPrinter := printer.NewTerminalPrinter(50)
 
-	epsonPrinterFormatter := billFormatter.NewBillEpsonPrinterFormatter()
+	// epsonPrinterFormatter := billFormatter.NewBillEpsonPrinterFormatter()
+	terminalPrinterFormatter := billFormatter.NewBillTerminalFormatter()
 
-	bill := bill.NewBill(
+	bill := bill.NewBillingHandler(
 		productRepo,
-		epsonPrinter,
-		epsonPrinterFormatter,
+		billRepo,
+		termimalPrinter,
+		terminalPrinterFormatter,
 		utils.GetBillsDir(),
 	)
 
