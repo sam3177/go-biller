@@ -1,11 +1,13 @@
 package utils
 
 import (
+	"bytes"
 	"fmt"
 	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"runtime"
 )
 
@@ -28,4 +30,29 @@ func GetBillsDir() string {
 
 	// Resolve project root (go up 2 levels from cmd/bill/main.go)
 	return filepath.Join(filepath.Dir(file), "../../bills")
+}
+
+func CleanBufferBeforeCreatingTheFile(input *bytes.Buffer) *bytes.Buffer {
+	var cleaned bytes.Buffer
+	for {
+		b, err := input.ReadByte()
+		if err != nil {
+			break // EOF reached
+		}
+		// Check if the byte is printable or a valid whitespace (newline, tab, etc.)
+		if (b >= 32 && b <= 126) || b == '\n' || b == '\t' {
+			cleaned.WriteByte(b)
+		}
+	}
+
+	// Define unwanted sequences using a regex pattern
+	// Match sequences like @L, aE!, daE!, E before Total, and dV
+	unwantedPattern := regexp.MustCompile(`(@L|aE!|daE!|dV)`)
+
+	// Replace unwanted sequences in the buffer
+	content := unwantedPattern.ReplaceAll(cleaned.Bytes(), []byte(""))
+	content = regexp.MustCompile(`ETotal`).ReplaceAll(content, []byte("Total"))
+
+	// Return the cleaned content as a bytes.Buffer
+	return bytes.NewBuffer(content)
 }

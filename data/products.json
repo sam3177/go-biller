@@ -4,27 +4,27 @@
     "name": "Banana",
     "unitPrice": 1,
     "unitType": "kg",
-    "stock": 37
+    "stock": 9999
   },
   {
     "id": "8e3fdb8b-8aa7-46a4-a506-5c8cee423411",
     "name": "Apple",
     "unitPrice": 2,
     "unitType": "kg",
-    "stock": 29
+    "stock": 9999
   },
   {
     "id": "e6ac66a3-e4b5-48bd-9670-2b310196cf32",
     "name": "Orange",
     "unitPrice": 3,
     "unitType": "kg",
-    "stock": 5.44
+    "stock": 9999
   },
   {
     "id": "5a022dd4-5253-4b43-9cd3-9919a2921110",
     "name": "Avocado",
     "unitPrice": 2.19,
     "unitType": "piece",
-    "stock": 32
+    "stock": 9999
   }
 ]

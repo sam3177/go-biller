@@ -59,15 +59,16 @@ func (menuHandler *ActionsMenuHandler) HandleActions() {
 }
 
 func (menuHandler *ActionsMenuHandler) executeAction(action string) {
-	products := menuHandler.billingHandler.ProductRepo.GetProducts()
 
 	switch action {
 	case utils.BILL_ACTIONS[utils.AddProduct]:
+		products := menuHandler.billingHandler.ProductRepo.GetProducts()
 		name, quantity := menuHandler.inputHandler.GetBillItem(products, "add")
 		menuHandler.billingHandler.AddProduct(name, quantity)
 		fmt.Println(menuHandler.billingHandler.GetProducts())
 
 	case utils.BILL_ACTIONS[utils.RemoveProduct]:
+		products := menuHandler.billingHandler.GetProductsWithInfos()
 		name, quantity := menuHandler.inputHandler.GetBillItem(products, "remove")
 		menuHandler.billingHandler.RemoveProduct(name, quantity)
 		fmt.Println(menuHandler.billingHandler.GetProducts())

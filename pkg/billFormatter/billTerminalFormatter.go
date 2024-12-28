@@ -16,6 +16,8 @@ func NewBillTerminalFormatter() *BillTerminalFormatter {
 }
 
 func (formatter *BillTerminalFormatter) FormatBill(billData utils.BillData, rowLength int) bytes.Buffer {
+	defer formatter.buffer.Reset()
+	
 	billTitle := formatter.getBillTitle()
 	formatter.buffer.WriteString(fmt.Sprintf("%*s", (rowLength+len(billTitle))/2, billTitle))
 

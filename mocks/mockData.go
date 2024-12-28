@@ -15,5 +15,3 @@ func GetMockProductsCopy() []utils.Product {
 	copy(copied, MockProducts) // Copy only the top-level slice
 	return copied
 }
-
-// TODO enforce all fields to product

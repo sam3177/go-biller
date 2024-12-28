@@ -54,8 +54,6 @@ func (handler *InputHandler) getProductItem(products []utils.Product, action str
 		promptVariant = "remove from"
 	}
 
-	// TODO: show only available product to remove for "remove" action (products that are already in cart)
-
 	prompt := promptui.Select{
 		Label: fmt.Sprintf("Please type in the product you want to %v the bill: ", promptVariant),
 		Items: func() []string {
@@ -76,7 +74,6 @@ func (handler *InputHandler) getProductItem(products []utils.Product, action str
 func (handler *InputHandler) getBillItemQuantity(productName string, action string) float64 {
 	return handler.GetValidFloatFromInput(
 		fmt.Sprintf("Please provide the quantity of %v you want to %v: ", productName, action),
-		// TODO: maibe an interface down here
 		utils.GetValidNumberFromInputOptions{ShouldBePositive: true})
 }
 

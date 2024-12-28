@@ -114,7 +114,19 @@ func (bill *BillingHandler) CalculateTotal() float64 {
 	return total
 }
 
-func (billingHandler *BillingHandler) getProductsWithInfosForFormatter() []utils.ProductWithQuantityFromBill {
+func (billingHandler *BillingHandler) GetProductsWithInfos() []utils.Product {
+	products := []utils.Product{}
+
+	for _, value := range billingHandler.products {
+		product, _ := billingHandler.ProductRepo.GetProductById(value.Id)
+
+		products = append(products, *product)
+	}
+
+	return products
+}
+
+func (billingHandler *BillingHandler) GetProductsWithInfosForFormatter() []utils.ProductWithQuantityFromBill {
 	products := []utils.ProductWithQuantityFromBill{}
 
 	for _, value := range billingHandler.products {
@@ -129,11 +141,11 @@ func (billingHandler *BillingHandler) getProductsWithInfosForFormatter() []utils
 	return products
 }
 
-func (billingHandler *BillingHandler) FormatBill() bytes.Buffer {
+func (billingHandler *BillingHandler) FormatBill() *bytes.Buffer {
 
 	// Create a BillData DTO
 	billData := utils.BillData{
-		Products: billingHandler.getProductsWithInfosForFormatter(),
+		Products: billingHandler.GetProductsWithInfosForFormatter(),
 		Subtotal: billingHandler.CalculateTotal(),
 		//VAT to be added in the future
 		Total: billingHandler.CalculateTotal(),
@@ -141,29 +153,27 @@ func (billingHandler *BillingHandler) FormatBill() bytes.Buffer {
 
 	formattedBill := billingHandler.Formatter.FormatBill(billData, billingHandler.Printer.GetRowLength())
 
-	return formattedBill
+	return &formattedBill
 }
 
 func (billingHandler *BillingHandler) PrintBill() {
 	formattedBill := billingHandler.FormatBill()
 
 	// Print the formatted bill
-	billingHandler.Printer.Print(formattedBill)
+	billingHandler.Printer.Print(*formattedBill)
 }
 
 func (billingHandler *BillingHandler) SaveBill() string {
 	data := billingHandler.FormatBill()
 
-	// TODO: problems on saved file if using the printer formatter
 	fileName := "bill_" + uuid.NewString() + ".txt"
 
-	error := os.WriteFile(billingHandler.BillsDir+"/"+fileName, data.Bytes(), 0644)
+	error := os.WriteFile(billingHandler.BillsDir+"/"+fileName, utils.CleanBufferBeforeCreatingTheFile(data).Bytes(), 0644)
 
 	billingHandler.BillRepo.AddBill(billingHandler.products, billingHandler.CalculateTotal(), billingHandler.CalculateTotal())
 
 	if error != nil {
 		fmt.Println("Error", error)
-		panic(error) // TODO: handle error, get rid of panic here
 	}
 
 	return fileName

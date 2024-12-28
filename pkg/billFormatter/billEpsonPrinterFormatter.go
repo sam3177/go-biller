@@ -15,6 +15,8 @@ func NewBillEpsonPrinterFormatter() *BillEpsonPrinterFormatter {
 }
 
 func (formatter *BillEpsonPrinterFormatter) FormatBill(billData utils.BillData, rowLength int) bytes.Buffer {
+	defer formatter.buffer.Reset()
+
 	formatter.buffer.Write([]byte{0x1B, 0x40})             // ESC @ (initialize)
 	formatter.buffer.Write([]byte{0x1D, 0x4C, 0x0A, 0x00}) // 10 dots left margin (1 character width)
 
