@@ -24,7 +24,7 @@ func NewActionMenuHandler(billingHandler *bill.BillingHandler, inputHandler *inp
 
 func (menuHandler *ActionsMenuHandler) selectAction(actions []string, hasProducts bool) (string, error) {
 	if hasProducts {
-		actions = append(actions[0:1], append([]string{utils.BILL_ACTIONS["removeProduct"]}, actions[1:]...)...)
+		actions = append(actions[0:1], append([]string{utils.BILL_ACTIONS[utils.RemoveProduct]}, actions[1:]...)...)
 	}
 
 	prompt := promptui.Select{
@@ -40,10 +40,10 @@ func (menuHandler *ActionsMenuHandler) selectAction(actions []string, hasProduct
 func (menuHandler *ActionsMenuHandler) HandleActions() {
 
 	promptItems := []string{
-		utils.BILL_ACTIONS["addProduct"],
-		utils.BILL_ACTIONS["printBill"],
-		utils.BILL_ACTIONS["saveAndExit"],
-		utils.BILL_ACTIONS["exit"],
+		utils.BILL_ACTIONS[utils.AddProduct],
+		utils.BILL_ACTIONS[utils.PrintBill],
+		utils.BILL_ACTIONS[utils.SaveAndExit],
+		utils.BILL_ACTIONS[utils.Exit],
 	}
 
 	for {
@@ -62,25 +62,25 @@ func (menuHandler *ActionsMenuHandler) executeAction(action string) {
 	products := menuHandler.billingHandler.ProductRepo.GetProducts()
 
 	switch action {
-	case utils.BILL_ACTIONS["addProduct"]:
+	case utils.BILL_ACTIONS[utils.AddProduct]:
 		name, quantity := menuHandler.inputHandler.GetBillItem(products, "add")
 		menuHandler.billingHandler.AddProduct(name, quantity)
 		fmt.Println(menuHandler.billingHandler.GetProducts())
 
-	case utils.BILL_ACTIONS["removeProduct"]:
+	case utils.BILL_ACTIONS[utils.RemoveProduct]:
 		name, quantity := menuHandler.inputHandler.GetBillItem(products, "remove")
 		menuHandler.billingHandler.RemoveProduct(name, quantity)
 		fmt.Println(menuHandler.billingHandler.GetProducts())
 
-	case utils.BILL_ACTIONS["printBill"]:
+	case utils.BILL_ACTIONS[utils.PrintBill]:
 		menuHandler.billingHandler.PrintBill()
 
-	case utils.BILL_ACTIONS["saveAndExit"]:
+	case utils.BILL_ACTIONS[utils.SaveAndExit]:
 		fileName := menuHandler.billingHandler.SaveBill()
 		utils.OpenFileInVsCode(menuHandler.billingHandler.BillsDir + "/" + fileName)
 		os.Exit(0)
 
-	case utils.BILL_ACTIONS["exit"]:
+	case utils.BILL_ACTIONS[utils.Exit]:
 		os.Exit(0)
 	}
 }

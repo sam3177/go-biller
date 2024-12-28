@@ -34,6 +34,18 @@ const (
 	UnitKg    UnitType = "kg"
 )
 
+// Define a custom type for actions
+type BillAction string
+
+// Use constants for predefined actions
+const (
+	AddProduct    BillAction = "addProduct"
+	RemoveProduct BillAction = "removeProduct"
+	PrintBill     BillAction = "printBill"
+	SaveAndExit   BillAction = "saveAndExit"
+	Exit          BillAction = "exit"
+)
+
 type Product struct {
 	Id        string   `json:"id"`
 	Name      string   `json:"name"`
