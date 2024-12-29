@@ -19,8 +19,8 @@ import (
 )
 
 func main() {
-	productsJSONHandler := productsJsonStorageHandler.NewProductsJSONStorageHandler("./data/products.json")
-	billsJSONHandler := billsJsonStorageHandler.NewBillsJSONStorageHandler("./data/bills.json")
+	productsJSONHandler := productsJsonStorageHandler.NewProductsJSONStorageHandler(utils.GetAbsolutePath("./data/products.json"))
+	billsJSONHandler := billsJsonStorageHandler.NewBillsJSONStorageHandler(utils.GetAbsolutePath("./data/bills.json"))
 
 	error := productsJSONHandler.SeedJSONFile(productRepository.ProductsSeed)
 
@@ -42,7 +42,7 @@ func main() {
 		billRepo,
 		termimalPrinter,
 		terminalPrinterFormatter,
-		utils.GetBillsDir(),
+		utils.GetAbsolutePath("./bills"),
 	)
 
 	inputValidator := inputValidator.NewInputValidator()

@@ -58,6 +58,9 @@ func (handler *BillsJSONStorageHandler) Get(id string) (*utils.Bill, error) {
 
 func (handler *BillsJSONStorageHandler) Add(newBill utils.Bill) (*utils.Bill, error) {
 	bills, err := handler.GetAll()
+
+	// TODO: investigate why after formatting bills.json file, the new bill is not added properly and breaks the file
+
 	if err != nil {
 		return nil, fmt.Errorf("failed to read bills: %w", err)
 	}

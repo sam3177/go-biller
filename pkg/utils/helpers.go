@@ -8,7 +8,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
-	"runtime"
+	"strings"
 )
 
 func OpenFileInVsCode(filePath string) {
@@ -22,14 +22,23 @@ func OpenFileInVsCode(filePath string) {
 	}
 }
 
-func GetBillsDir() string {
-	_, file, _, ok := runtime.Caller(0)
-	if !ok {
-		log.Fatal("Unable to determine caller information")
+func GetAbsolutePath(relativePath string) string {
+	executablePath, err := os.Executable()
+	if err != nil {
+		panic(err)
 	}
 
-	// Resolve project root (go up 2 levels from cmd/bill/main.go)
-	return filepath.Join(filepath.Dir(file), "../../bills")
+	// Check if running from a temp directory
+	if strings.Contains(executablePath, "go-build") {
+		// Assume development mode; use the working directory
+		wd, err := os.Getwd()
+		if err != nil {
+			log.Fatalf("Failed to get working directory: %v", err)
+		}
+		return filepath.Join(wd, relativePath)
+	}
+
+	return filepath.Join(filepath.Dir(executablePath), "..", relativePath)
 }
 
 func CleanBufferBeforeCreatingTheFile(input *bytes.Buffer) *bytes.Buffer {
