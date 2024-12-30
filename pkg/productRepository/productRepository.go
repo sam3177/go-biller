@@ -114,7 +114,7 @@ func (repo *LocalProductRepository) UpdateStock(id string, quantity float64) (fl
 		return 0, fmt.Errorf("the available stock for this product is %f, but you requested %f", product.Stock, quantity*-1)
 	}
 
-	product.Stock += quantity
+	product.Stock = utils.RoundToGivenDecimals(product.Stock+quantity, 3)
 
 	updateProductError := repo.dataHandler.UpdateProduct(*product)
 

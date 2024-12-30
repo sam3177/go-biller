@@ -42,7 +42,7 @@ func (handler *InputHandler) GetValidFloatFromInput(prompt string, options utils
 	}
 	floatValue, _ := strconv.ParseFloat(value, 64)
 
-	return floatValue
+	return utils.RoundToGivenDecimals(floatValue, options.FloatPrecision)
 }
 
 func (handler *InputHandler) getProductItem(products []utils.Product, action string) utils.Product {
@@ -73,8 +73,8 @@ func (handler *InputHandler) getProductItem(products []utils.Product, action str
 
 func (handler *InputHandler) getBillItemQuantity(productName string, action string) float64 {
 	return handler.GetValidFloatFromInput(
-		fmt.Sprintf("Please provide the quantity of %v you want to %v: ", productName, action),
-		utils.GetValidNumberFromInputOptions{ShouldBePositive: true})
+		fmt.Sprintf("Please provide the quantity of %v you want to %v (rounded to 3 decimals if more are provided): ", productName, action),
+		utils.GetValidNumberFromInputOptions{ShouldBePositive: true, FloatPrecision: 3})
 }
 
 func (handler *InputHandler) GetBillItem(products []utils.Product, action string) (string, float64) {

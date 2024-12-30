@@ -4,6 +4,7 @@ import "bytes"
 
 type GetValidNumberFromInputOptions struct {
 	ShouldBePositive bool
+	FloatPrecision   int
 }
 
 // printer

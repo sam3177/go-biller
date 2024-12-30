@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"log"
+	"math"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -55,7 +56,7 @@ func CleanBufferBeforeCreatingTheFile(input *bytes.Buffer) *bytes.Buffer {
 	}
 
 	// Define unwanted sequences using a regex pattern
-	// Match sequences like @L, aE!, daE!, E before Total, and dV
+	// Match sequences like @L, aE!, daE! and dV
 	unwantedPattern := regexp.MustCompile(`(@L|aE!|daE!|dV)`)
 
 	// Replace unwanted sequences in the buffer
@@ -64,4 +65,10 @@ func CleanBufferBeforeCreatingTheFile(input *bytes.Buffer) *bytes.Buffer {
 
 	// Return the cleaned content as a bytes.Buffer
 	return bytes.NewBuffer(content)
+}
+
+func RoundToGivenDecimals(value float64, decimals int) float64 {
+	precision := math.Pow(10, float64(decimals))
+
+	return math.Round(value*precision) / precision
 }

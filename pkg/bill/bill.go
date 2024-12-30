@@ -111,7 +111,7 @@ func (bill *BillingHandler) CalculateTotal() float64 {
 		total += value.Quantity * product.UnitPrice
 	}
 
-	return total
+	return utils.RoundToGivenDecimals(total, 2)
 }
 
 func (billingHandler *BillingHandler) GetProductsWithInfos() []utils.Product {
