@@ -45,14 +45,12 @@ func (formatter *BillEpsonPrinterFormatter) FormatBill(billData utils.BillData, 
 func (formatter *BillEpsonPrinterFormatter) makeBillHeader(rowLength int) {
 	formatter.alignCenter()
 	formatter.enableBold()
-	formatter.buffer.Write([]byte{0x1D, 0x21, 0x11}) // Double width and height font
 
 	formatter.buffer.WriteString(formatter.getBillTitle())
 	formatter.buffer.Write([]byte{0x1B, 0x64, 0x02}) // Feed 2 lines
 
 	formatter.alignLeft()
 	formatter.disableBold()
-	formatter.buffer.Write([]byte{0x1D, 0x21, 0x00}) // Reset font size
 
 	formatter.buffer.WriteString(formatter.makeLineSeparator(rowLength))
 }

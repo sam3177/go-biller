@@ -44,7 +44,7 @@ func (formatter *BillFormatter) formatBillProduct(billProduct utils.ProductWithQ
 
 	formattedQuantityTimesUnitPrice := fmt.Sprintf("%*s",
 		rowLength/2,
-		fmt.Sprintf("%v X %0.2f", billProduct.Quantity, billProduct.UnitPrice),
+		fmt.Sprintf("%v %s X %0.2f", billProduct.Quantity, strings.ToUpper(string(billProduct.UnitType)), billProduct.UnitPrice),
 	)
 
 	formattedProduct += formattedQuantityTimesUnitPrice
