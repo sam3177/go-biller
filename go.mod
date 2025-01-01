@@ -3,6 +3,7 @@ module biller
 go 1.23.3
 
 require (
+	github.com/boombuler/barcode v1.0.2
 	github.com/google/uuid v1.6.0
 	github.com/manifoldco/promptui v0.9.0
 	github.com/stretchr/testify v1.10.0
