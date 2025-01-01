@@ -5,18 +5,20 @@ import (
 	"bytes"
 	"fmt"
 	"image"
-
-	"github.com/boombuler/barcode"
-	"github.com/boombuler/barcode/qr"
 )
 
 type BillEpsonPrinterFormatter struct {
 	BillFormatter
-	buffer bytes.Buffer
+	barcodeGenerator utils.BarcodeGeneratorInterface
+	buffer           bytes.Buffer
 }
 
-func NewBillEpsonPrinterFormatter() *BillEpsonPrinterFormatter {
-	return &BillEpsonPrinterFormatter{}
+func NewBillEpsonPrinterFormatter(
+	barcodeGenerator utils.BarcodeGeneratorInterface,
+) *BillEpsonPrinterFormatter {
+	return &BillEpsonPrinterFormatter{
+		barcodeGenerator: barcodeGenerator,
+	}
 }
 
 func (formatter *BillEpsonPrinterFormatter) FormatBill(billData utils.BillData, rowLength int) bytes.Buffer {
@@ -42,7 +44,7 @@ func (formatter *BillEpsonPrinterFormatter) FormatBill(billData utils.BillData, 
 	formatter.buffer.WriteString(formatter.formatTotal(billData.Total, rowLength))
 	formatter.alignCenter()
 
-	formatter.GetBarcodeBuffer()
+	formatter.AppendQRCodeToBuffer("https://www.instagram.com/silviu.rvn/") // come back here to put the bill id
 
 	formatter.buffer.Write([]byte{0x1B, 0x64, 0x06}) // Feed 6 lines
 	formatter.buffer.Write([]byte{0x1D, 0x56, 0x00}) // Cut the paper
@@ -79,29 +81,15 @@ func (formatter *BillEpsonPrinterFormatter) disableBold() {
 	formatter.buffer.Write([]byte{0x1B, 0x45, 0x00}) // ESC E 0 - Disable bold
 }
 
-func (formatter *BillFormatter) CreateBarcode(id string) (barcode.Barcode, error) {
+func (formatter *BillEpsonPrinterFormatter) AppendQRCodeToBuffer(data string) {
 
-	// Generate a Code128 barcode
-	code, err := qr.Encode(id, qr.M, qr.Auto)
-	if err != nil {
-		fmt.Println("Error generating barcode:", err)
-
-		return nil, err
-	}
-	code, _ = barcode.Scale(code, 300, 300)
-
-	return code, nil
-}
-
-func (formatter *BillEpsonPrinterFormatter) GetBarcodeBuffer() {
-
-	barcode, err := formatter.CreateBarcode("https://www.instagram.com/silviu.rvn/")
+	barcode, err := formatter.barcodeGenerator.GenerateCode(data, 300, 300)
 	if err != nil {
 		fmt.Println("Error generating barcode:", err)
 		return
 	}
-	bytes, err := convertImageToRaster(barcode)
 
+	bytes, err := formatter.ConvertImageToRaster(barcode)
 	if err != nil {
 		fmt.Println("Error converting image to raster:", err)
 		return
@@ -110,21 +98,13 @@ func (formatter *BillEpsonPrinterFormatter) GetBarcodeBuffer() {
 	formatter.buffer.Write(bytes)
 }
 
-func convertImageToRaster(img image.Image) ([]byte, error) {
+func (formatter *BillEpsonPrinterFormatter) ConvertImageToRaster(img image.Image) ([]byte, error) {
 	var buffer bytes.Buffer
 
-	// Convert the image to a monochrome raster format
 	bounds := img.Bounds()
 	width := bounds.Dx()
 	height := bounds.Dy()
 	widthBytes := (width + 7) / 8 // 1 byte = 8 pixels
-
-	fmt.Println("widthBytes", widthBytes)
-	//print hieght
-
-	fmt.Println("height", height)
-	//print width
-	fmt.Println("width", width)
 
 	// ESC/POS raster command header
 	buffer.Write([]byte{0x1D, 0x76, 0x30, 0x00})
