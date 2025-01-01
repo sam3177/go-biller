@@ -57,7 +57,7 @@ func CleanBufferBeforeCreatingTheFile(input *bytes.Buffer) *bytes.Buffer {
 
 	// Define unwanted sequences using a regex pattern
 	// Match sequences like @L, aE!, daE! and dV
-	unwantedPattern := regexp.MustCompile(`(@L|aE!|daE!|dV)`)
+	unwantedPattern := regexp.MustCompile(`(@L|aE!|daE!|dV|aE|daE|av0&,)`)
 
 	// Replace unwanted sequences in the buffer
 	content := unwantedPattern.ReplaceAll(cleaned.Bytes(), []byte(""))

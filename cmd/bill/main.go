@@ -12,6 +12,7 @@ import (
 	"biller/pkg/printer"
 	"biller/pkg/productRepository"
 	"biller/pkg/productsJsonStorageHandler"
+	"biller/pkg/qrCodeGenerator"
 	"biller/pkg/utils"
 	"bufio"
 	"fmt"
@@ -34,7 +35,9 @@ func main() {
 	epsonPrinter := printer.NewEpsonPrinter("EPSON_TM_T20III")
 	// termimalPrinter := printer.NewTerminalPrinter(50)
 
-	epsonPrinterFormatter := billFormatter.NewBillEpsonPrinterFormatter()
+	epsonPrinterFormatter := billFormatter.NewBillEpsonPrinterFormatter(
+		qrCodeGenerator.NewQRCodeGenerator(),
+	)
 	// terminalPrinterFormatter := billFormatter.NewBillTerminalFormatter()
 
 	bill := bill.NewBillingHandler(
