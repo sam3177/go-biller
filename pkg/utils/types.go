@@ -1,6 +1,9 @@
 package utils
 
-import "bytes"
+import (
+	"bytes"
+	"image"
+)
 
 type GetValidNumberFromInputOptions struct {
 	ShouldBePositive bool
@@ -126,4 +129,9 @@ type BillStorageHandlerInterface interface {
 	GetAll() ([]Bill, error)
 	Get(string) (*Bill, error)
 	Add(Bill) (*Bill, error)
+}
+
+// barcode Generator
+type BarcodeGeneratorInterface interface {
+	GenerateCode(data string, width int, height int) (image.Image, error)
 }
