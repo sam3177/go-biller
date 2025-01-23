@@ -45,7 +45,7 @@ func TestGetValidFloatFromInput(t *testing.T) {
 	validatorMock := new(mocks.InputValidatorMock)
 	handler := inputHandler.NewInputHandler(readerMock, validatorMock)
 
-	options := utils.GetValidNumberFromInputOptions{ShouldBePositive: true}
+	options := utils.GetValidNumberFromInputOptions{ShouldBePositive: true, FloatPrecision: 2}
 
 	// Simulate valid input
 	readerMock.On("GetInput", mock.Anything).Return("42.5", nil).Once()
