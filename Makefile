@@ -15,9 +15,18 @@ build:
 	@echo "Building $(APP_NAME)..."
 	go build -o $(OUTPUT_FILE) $(CMD_DIR)
 
+# run with default terminat printer & formatter
 run:
 	@echo "Running $(APP_NAME)..."
 	go run $(CMD_DIR)
+
+run-terminal-printer:
+	@echo "Running $(APP_NAME) with terminal printer..."
+	go run $(CMD_DIR) terminalPrinter
+
+run-epson-printer:
+	@echo "Running $(APP_NAME) with EPSON printer..."
+	go run $(CMD_DIR) epsonPrinter
 
 clean:
 	@echo "Cleaning up..."
