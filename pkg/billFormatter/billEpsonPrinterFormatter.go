@@ -37,11 +37,14 @@ func (formatter *BillEpsonPrinterFormatter) FormatBill(billData utils.BillData, 
 
 	formatter.buffer.WriteString(formatter.formatSubtotal(billData.Subtotal, rowLength))
 
+	formatter.buffer.WriteString("TODO - TVA \n")
+
 	formatter.buffer.WriteString(formatter.makeLineSeparator(rowLength))
 
 	formatter.enableBold()
 
 	formatter.buffer.WriteString(formatter.formatTotal(billData.Total, rowLength))
+	formatter.buffer.Write([]byte{0x1B, 0x64, 0x04}) // Feed 4 lines
 	formatter.alignCenter()
 
 	formatter.AppendQRCodeToBuffer("https://www.instagram.com/silviu.rvn/") // come back here to put the bill id
