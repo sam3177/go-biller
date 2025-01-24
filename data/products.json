@@ -1,30 +1,42 @@
 [
   {
-    "id": "5cde4b12-afc2-42d9-a1fa-723759e95953",
+    "id": "00308631-d089-4096-9def-c77606b3f6c6",
     "name": "Banana",
     "unitPrice": 1,
     "unitType": "kg",
-    "stock": 9999
+    "stock": 32,
+    "vatCategory": "A"
   },
   {
-    "id": "8e3fdb8b-8aa7-46a4-a506-5c8cee423411",
+    "id": "a6038a31-838f-4ed0-b39f-c872b758cbc1",
     "name": "Apple",
     "unitPrice": 2,
     "unitType": "kg",
-    "stock": 9999
+    "stock": 30,
+    "vatCategory": "A"
   },
   {
-    "id": "e6ac66a3-e4b5-48bd-9670-2b310196cf32",
+    "id": "5bf274e4-6f03-45f7-9fa7-d1384b6739a6",
     "name": "Orange",
     "unitPrice": 3,
     "unitType": "kg",
-    "stock": 9999
+    "stock": 6,
+    "vatCategory": "A"
   },
   {
-    "id": "5a022dd4-5253-4b43-9cd3-9919a2921110",
+    "id": "86f8c852-c38c-4590-acfc-5cdc728c0a6d",
     "name": "Avocado",
     "unitPrice": 2.19,
     "unitType": "piece",
-    "stock": 9999
+    "stock": 32,
+    "vatCategory": "A"
+  },
+  {
+    "id": "d370d9df-d69b-4c5a-b37f-6cc4ac09f378",
+    "name": "Toilet Paper",
+    "unitPrice": 0.1,
+    "unitType": "piece",
+    "stock": 22,
+    "vatCategory": "B"
   }
 ]
