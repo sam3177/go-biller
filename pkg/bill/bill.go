@@ -114,6 +114,20 @@ func (bill *BillingHandler) CalculateTotal() float64 {
 	return utils.RoundToGivenDecimals(total, 2)
 }
 
+// TODO: test for this new method
+func (bill *BillingHandler) CalculateVAT() float64 {
+	var totalVAT float64 = 0
+
+	for _, value := range bill.products {
+		product, _ := bill.ProductRepo.GetProductById(value.Id)
+		VATPercentage := utils.VAT_PERCENTAGES_PER_CATEGORY[product.VATCategory]
+		VATPerUnit := product.UnitPrice * (VATPercentage / 100)
+		totalVAT += value.Quantity * VATPerUnit
+	}
+
+	return utils.RoundToGivenDecimals(totalVAT, 2)
+}
+
 func (billingHandler *BillingHandler) GetProductsWithInfos() []utils.Product {
 	products := []utils.Product{}
 
@@ -145,10 +159,10 @@ func (billingHandler *BillingHandler) FormatBill() *bytes.Buffer {
 
 	// Create a BillData DTO
 	billData := utils.BillData{
-		Products: billingHandler.GetProductsWithInfosForFormatter(),
-		Subtotal: billingHandler.CalculateTotal(),
-		//VAT to be added in the future
-		Total: billingHandler.CalculateTotal(),
+		Products:  billingHandler.GetProductsWithInfosForFormatter(),
+		Subtotal:  billingHandler.CalculateTotal() - billingHandler.CalculateVAT(),
+		VATAmount: billingHandler.CalculateVAT(),
+		Total:     billingHandler.CalculateTotal(),
 	}
 
 	formattedBill := billingHandler.Formatter.FormatBill(billData, billingHandler.Printer.GetRowLength())
