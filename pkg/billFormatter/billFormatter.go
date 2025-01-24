@@ -31,6 +31,13 @@ func (formatter *BillFormatter) formatSubtotal(subtotal float64, rowLength int) 
 	return subtotalRow
 }
 
+func (formatter *BillFormatter) formatVATAmount(subtotal float64, rowLength int) string {
+	VATRow := ""
+	VATRow += formatter.makeFooterLine("VAT", subtotal, rowLength)
+
+	return VATRow
+}
+
 func (formatter *BillFormatter) formatTotal(total float64, rowLength int) string {
 	totalRow := ""
 	totalRow += formatter.makeFooterLine("Total", total, rowLength)
@@ -40,7 +47,12 @@ func (formatter *BillFormatter) formatTotal(total float64, rowLength int) string
 
 func (formatter *BillFormatter) formatBillProduct(billProduct utils.ProductWithQuantityFromBill, rowLength int) string {
 	formattedProduct := ""
-	formattedProduct += fmt.Sprintf(billProduct.Name + "\n")
+	formattedProduct += fmt.Sprintf(billProduct.Name)
+
+	formattedProduct += fmt.Sprintf("%*v \n",
+		rowLength-len(billProduct.Name),
+		billProduct.VATCategory,
+	)
 
 	formattedQuantityTimesUnitPrice := fmt.Sprintf("%*s",
 		rowLength/2,

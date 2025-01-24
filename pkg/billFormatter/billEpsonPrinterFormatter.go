@@ -37,7 +37,7 @@ func (formatter *BillEpsonPrinterFormatter) FormatBill(billData utils.BillData, 
 
 	formatter.buffer.WriteString(formatter.formatSubtotal(billData.Subtotal, rowLength))
 
-	formatter.buffer.WriteString("TODO - TVA \n")
+	formatter.buffer.WriteString(formatter.formatVATAmount(billData.VATAmount, rowLength))
 
 	formatter.buffer.WriteString(formatter.makeLineSeparator(rowLength))
 
