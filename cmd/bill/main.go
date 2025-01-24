@@ -24,7 +24,7 @@ func GetProperPrinterAndFormatter() (utils.PrinterInterface, utils.BillFormatter
 	var printerType string
 
 	if len(args) == 0 {
-		printerType = "epsonPrinter"
+		printerType = "terminalPrinter"
 	} else {
 		printerType = args[0]
 	}
