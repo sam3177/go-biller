@@ -62,6 +62,7 @@ func (repo *LocalProductRepository) AddProduct(
 	unitPrice float64,
 	unitType utils.UnitType,
 	stock float64,
+	vatCategory utils.VATCategory,
 ) *utils.Product {
 	// name check
 	if name == "" {
@@ -83,11 +84,17 @@ func (repo *LocalProductRepository) AddProduct(
 		panic("Product stock must be 0 or greater.")
 	}
 
+	// check VAT category
+	if vatCategory != utils.A && vatCategory != utils.B {
+		panic("Product VAT category must be 'A' or 'B'.")
+	}
+
 	newProduct, error := repo.dataHandler.AddProduct(utils.Product{
-		Name:      name,
-		UnitPrice: unitPrice,
-		UnitType:  unitType,
-		Stock:     stock,
+		Name:        name,
+		UnitPrice:   unitPrice,
+		UnitType:    unitType,
+		Stock:       stock,
+		VATCategory: vatCategory,
 	})
 
 	if error != nil {
