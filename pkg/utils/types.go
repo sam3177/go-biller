@@ -27,6 +27,7 @@ type ProductRepositoryInterface interface {
 		unitPrice float64,
 		unitType UnitType,
 		stock float64,
+		vatCategory VATCategory,
 	) *Product
 }
 
@@ -36,6 +37,14 @@ type UnitType string
 const (
 	UnitPiece UnitType = "piece"
 	UnitKg    UnitType = "kg"
+)
+
+// VAT category
+type VATCategory string
+
+const (
+	A VATCategory = "A"
+	B VATCategory = "B"
 )
 
 // Define a custom type for actions
@@ -51,11 +60,12 @@ const (
 )
 
 type Product struct {
-	Id        string   `json:"id"`
-	Name      string   `json:"name"`
-	UnitPrice float64  `json:"unitPrice"`
-	UnitType  UnitType `json:"unitType"`
-	Stock     float64  `json:"stock"`
+	Id          string      `json:"id"`
+	Name        string      `json:"name"`
+	UnitPrice   float64     `json:"unitPrice"`
+	UnitType    UnitType    `json:"unitType"`
+	Stock       float64     `json:"stock"`
+	VATCategory VATCategory `json:"vatCategory"`
 }
 
 type ProductWithQuantityFromBill struct {
@@ -66,9 +76,10 @@ type ProductWithQuantityFromBill struct {
 // bills
 
 type BillData struct {
-	Products []ProductWithQuantityFromBill
-	Subtotal float64
-	Total    float64
+	Products  []ProductWithQuantityFromBill
+	Subtotal  float64
+	VATAmount float64
+	Total     float64
 }
 
 type BillProduct struct {
