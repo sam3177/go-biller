@@ -153,6 +153,7 @@ func TestAddProduct(t *testing.T) {
 		unitPrice   float64
 		unitType    interface{} // Allow UnitType to be any type for validation
 		stock       float64
+		vatCategory interface{} // Allow UnitType to be any type for validation
 		expectPanic bool
 	}{
 		{
@@ -161,6 +162,7 @@ func TestAddProduct(t *testing.T) {
 			unitPrice:   1.99,
 			unitType:    utils.UnitKg,
 			stock:       10.0,
+			vatCategory: utils.A,
 			expectPanic: false,
 		},
 		{
@@ -169,6 +171,7 @@ func TestAddProduct(t *testing.T) {
 			unitPrice:   1.99,
 			unitType:    utils.UnitKg,
 			stock:       10,
+			vatCategory: utils.A,
 			expectPanic: true,
 		},
 		{
@@ -177,6 +180,7 @@ func TestAddProduct(t *testing.T) {
 			unitPrice:   -1,
 			unitType:    utils.UnitKg,
 			stock:       10,
+			vatCategory: utils.A,
 			expectPanic: true,
 		},
 		{
@@ -185,6 +189,7 @@ func TestAddProduct(t *testing.T) {
 			unitPrice:   1.99,
 			unitType:    "invalidType",
 			stock:       10,
+			vatCategory: utils.A,
 			expectPanic: true,
 		},
 		{
@@ -193,6 +198,16 @@ func TestAddProduct(t *testing.T) {
 			unitPrice:   1.99,
 			unitType:    utils.UnitKg,
 			stock:       -5,
+			vatCategory: utils.A,
+			expectPanic: true,
+		},
+		{
+			name:        "Invalid VAT Category",
+			productName: "Apple",
+			unitPrice:   1.99,
+			unitType:    utils.UnitKg,
+			stock:       -5,
+			vatCategory: "invalidVATCategory",
 			expectPanic: true,
 		},
 	}
@@ -210,23 +225,25 @@ func TestAddProduct(t *testing.T) {
 			}()
 
 			newProduct := utils.Product{
-				Name:      tt.productName,
-				UnitPrice: tt.unitPrice,
-				UnitType:  tt.unitType.(utils.UnitType),
-				Stock:     tt.stock,
+				Name:        tt.productName,
+				UnitPrice:   tt.unitPrice,
+				UnitType:    tt.unitType.(utils.UnitType),
+				Stock:       tt.stock,
+				VATCategory: tt.vatCategory.(utils.VATCategory),
 			}
 
 			if !tt.expectPanic {
 				testProductsJsonStorageHandler.On("AddProduct", utils.Product{
-					Name:      tt.productName,
-					UnitPrice: tt.unitPrice,
-					UnitType:  tt.unitType.(utils.UnitType),
-					Stock:     tt.stock,
+					Name:        tt.productName,
+					UnitPrice:   tt.unitPrice,
+					UnitType:    tt.unitType.(utils.UnitType),
+					Stock:       tt.stock,
+					VATCategory: tt.vatCategory.(utils.VATCategory),
 				}).Return(&newProduct, nil).Once()
 			}
 
 			// Call NewProduct with the current test case data
-			product := repo.AddProduct(tt.productName, tt.unitPrice, tt.unitType.(utils.UnitType), tt.stock)
+			product := repo.AddProduct(tt.productName, tt.unitPrice, tt.unitType.(utils.UnitType), tt.stock, tt.vatCategory.(utils.VATCategory))
 			if product.Name != tt.productName {
 				t.Errorf("Expected Name '%s', got '%s'", tt.productName, product.Name)
 			}
@@ -241,6 +258,10 @@ func TestAddProduct(t *testing.T) {
 
 			if product.Stock != tt.stock {
 				t.Errorf("Expected Stock %f, got %f", tt.stock, product.Stock)
+			}
+
+			if product.VATCategory != tt.vatCategory {
+				t.Errorf("Expected VAT categoty %v, got %v", tt.vatCategory, product.VATCategory)
 			}
 		})
 	}

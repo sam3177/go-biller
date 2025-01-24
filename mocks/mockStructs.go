@@ -111,8 +111,8 @@ func (m *ProductRepositoryMock) IsEnoughProductInStock(id string, desiredQuantit
 }
 
 // Mock method for AddProduct
-func (m *ProductRepositoryMock) AddProduct(name string, unitPrice float64, unitType utils.UnitType, stock float64) *utils.Product {
-	args := m.Called(name, unitPrice, unitType, stock)
+func (m *ProductRepositoryMock) AddProduct(name string, unitPrice float64, unitType utils.UnitType, stock float64, vatCategory utils.VATCategory) *utils.Product {
+	args := m.Called(name, unitPrice, unitType, stock, vatCategory)
 	return args.Get(0).(*utils.Product)
 }
 
