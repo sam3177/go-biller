@@ -29,12 +29,6 @@ func GetProperPrinterAndFormatter() (utils.PrinterInterface, utils.BillFormatter
 		printerType = args[0]
 	}
 
-	// TODO: check for PrinterType
-	// if printerType == "" || (printerType != TerminalPrinter && printerType != EpsonPrinter) {
-	// 	printerType = TerminalPrinter
-
-	// }
-
 	switch printerType {
 
 	// case EpsonPrinter:

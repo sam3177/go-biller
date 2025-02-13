@@ -169,9 +169,9 @@ func populateBillWithProducts(bill *BillingHandler, testProductsRepo *mocks.Prod
 
 func mockGetProductByIdForAddedProducts(bill *BillingHandler, testProductsRepo *mocks.ProductRepositoryMock) {
 	repoProducts := []utils.Product{
-		{Name: "Product 1", UnitPrice: 4.0, UnitType: "kg"},
-		{Name: "Product 2", UnitPrice: 4.2, UnitType: "kg"},
-		{Name: "Product 3", UnitPrice: 34.1, UnitType: "kg"},
+		{Name: "Product 1", UnitPrice: 4.0, UnitType: "kg", VATCategory: utils.A},
+		{Name: "Product 2", UnitPrice: 4.2, UnitType: "piece", VATCategory: utils.A},
+		{Name: "Product 3", UnitPrice: 34.1, UnitType: "kg", VATCategory: utils.A},
 	} // 4, 5, 7
 	for idx, product := range bill.products {
 		testProductsRepo.On("GetProductById", product.Id).Return(
@@ -289,40 +289,21 @@ func TestCalculateTotal(t *testing.T) {
 	assert.Equal(t, 275.7, total)
 }
 
-// func TestFormatBill(t *testing.T) {
-// 	testProductsRepo := &mocks.ProductRepositoryMock{}
-// testBillRepo:= &mocks.BillRepositoryMock{}
-// 	bill := NewBill(testProductsRtestBillRepo,epo, testTermimalPrinter,testFormatter,"./bills")
+func TestCalculateVAT(t *testing.T) {
+	testProductsRepo := &mocks.ProductRepositoryMock{}
+	testBillRepo := &mocks.BillRepositoryMock{}
+	bill := NewBillingHandler(testProductsRepo, testBillRepo, testTermimalPrinter, testFormatter, "./bills")
 
-// 	// Arrange: Add initial products to the bill
-// 	populateBillWithProducts(bill, testProductsRepo)
-// 	mockGetProductByIdForAddedProducts(bill, testProductsRepo)
-// 	// do it 2 more times because makeTotal will be called 2 times inside format fn
-// 	mockGetProductByIdForAddedProducts(bill, testProductsRepo)
-// 	mockGetProductByIdForAddedProducts(bill, testProductsRepo)
+	// Arrange: Add initial products to the bill
+	populateBillWithProducts(bill, testProductsRepo)
 
-// 	// Format the bill
-// 	formattedBill := bill.FormatBill()
+	mockGetProductByIdForAddedProducts(bill, testProductsRepo)
 
-// 	expectedText := `              ----Bill----
-// Table name: Table 1
-// ----------------------------------------
-// Product 1
-//             4 X 4.00               16.00
-// Product 2
-//             5 X 4.20               21.00
-// Product 3
-//            7 X 34.10              238.70
-// ----------------------------------------
-// Subtotal                          275.70
-// ----------------------------------------
-
-// Total                             310.30
-
-// `
-// 	// Assert the expected formatted bill
-// 	assert.Equal(t, expectedText, formattedBill)
-// }
+	// Calculate the total
+	totalVAT := bill.CalculateVAT()
+	// Assert the expected total
+	assert.Equal(t, 24.81, totalVAT)
+}
 
 func TestSaveBill(t *testing.T) {
 	testProductsRepo := &mocks.ProductRepositoryMock{}

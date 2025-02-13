@@ -10,8 +10,6 @@ import (
 	"biller/pkg/utils"
 )
 
-// TODO: date on the bill
-
 type BillingHandler struct {
 	products    []utils.BillProduct
 	ProductRepo utils.ProductRepositoryInterface
@@ -114,7 +112,6 @@ func (bill *BillingHandler) CalculateTotal() float64 {
 	return utils.RoundToGivenDecimals(total, 2)
 }
 
-// TODO: test for this new method
 func (bill *BillingHandler) CalculateVAT() float64 {
 	var totalVAT float64 = 0
 
