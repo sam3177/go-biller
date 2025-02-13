@@ -40,3 +40,8 @@ tidy:
 test-and-build: test build
 
 all: tidy test-and-build
+
+# Install dependencies
+deps:
+	go mod download
+	go mod tidy
