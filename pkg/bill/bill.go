@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/google/uuid"
 
@@ -152,7 +153,7 @@ func (billingHandler *BillingHandler) GetProductsWithInfosForFormatter() []utils
 	return products
 }
 
-func (billingHandler *BillingHandler) FormatBill() *bytes.Buffer {
+func (billingHandler *BillingHandler) FormatBill(uuid string, createdAt string) *bytes.Buffer {
 
 	// Create a BillData DTO
 	billData := utils.BillData{
@@ -160,6 +161,8 @@ func (billingHandler *BillingHandler) FormatBill() *bytes.Buffer {
 		Subtotal:  billingHandler.CalculateTotal() - billingHandler.CalculateVAT(),
 		VATAmount: billingHandler.CalculateVAT(),
 		Total:     billingHandler.CalculateTotal(),
+		Id:        uuid,
+		CreatedAt: createdAt,
 	}
 
 	formattedBill := billingHandler.Formatter.FormatBill(billData, billingHandler.Printer.GetRowLength())
@@ -168,20 +171,30 @@ func (billingHandler *BillingHandler) FormatBill() *bytes.Buffer {
 }
 
 func (billingHandler *BillingHandler) PrintBill() {
-	formattedBill := billingHandler.FormatBill()
+	// we will send empty string for id and date, because we are just viewing the draft bill here,
+	// so we don't have an id and date for the bill. We will provide them on saving the bill
+	formattedBill := billingHandler.FormatBill("", "")
 
 	// Print the formatted bill
 	billingHandler.Printer.Print(*formattedBill)
 }
 
 func (billingHandler *BillingHandler) SaveBill() string {
-	data := billingHandler.FormatBill()
+	uuid := uuid.NewString()
+	createdAt := time.Now().Format("02-01-2006 15:04:05")
+	data := billingHandler.FormatBill(uuid, createdAt)
 
-	fileName := "bill_" + uuid.NewString() + ".txt"
+	fileName := "bill_" + uuid + ".txt"
 
 	error := os.WriteFile(billingHandler.BillsDir+"/"+fileName, utils.CleanBufferBeforeCreatingTheFile(data).Bytes(), 0644)
 
-	billingHandler.BillRepo.AddBill(billingHandler.products, billingHandler.CalculateTotal(), billingHandler.CalculateTotal())
+	billingHandler.BillRepo.AddBill(
+		billingHandler.products,
+		billingHandler.CalculateTotal()-billingHandler.CalculateVAT(),
+		billingHandler.CalculateTotal(),
+		createdAt,
+		uuid,
+	)
 
 	if error != nil {
 		fmt.Println("Error", error)

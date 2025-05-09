@@ -7,8 +7,6 @@ import (
 	"io"
 	"log"
 	"os"
-
-	"github.com/google/uuid"
 )
 
 type BillsJSONStorageHandler struct {
@@ -64,8 +62,6 @@ func (handler *BillsJSONStorageHandler) Add(newBill utils.Bill) (*utils.Bill, er
 	if err != nil {
 		return nil, fmt.Errorf("failed to read bills: %w", err)
 	}
-
-	newBill.Id = uuid.NewString()
 
 	bills = append(bills, newBill)
 

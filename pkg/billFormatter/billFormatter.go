@@ -73,3 +73,16 @@ func (formatter *BillFormatter) formatBillProduct(billProduct utils.ProductWithQ
 func (formatter *BillFormatter) getBillTitle() string {
 	return "----Bill----\n"
 }
+
+func (formatter *BillFormatter) formatBillDate(rowLength int, createdAt string) string {
+	if createdAt == "" {
+		return ""
+	}
+
+	dateSection := "\n"
+	dateSection += formatter.makeLineSeparator(rowLength)
+	dateSection += createdAt
+	dateSection += "\n"
+
+	return dateSection
+}
