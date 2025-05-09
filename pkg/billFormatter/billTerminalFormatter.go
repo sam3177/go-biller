@@ -37,5 +37,13 @@ func (formatter *BillTerminalFormatter) FormatBill(billData utils.BillData, rowL
 
 	formatter.buffer.WriteString(formatter.formatTotal(billData.Total, rowLength))
 
+	formatter.buffer.WriteString(formatter.formatBillDate(rowLength, billData.CreatedAt))
+
+	if billData.Id != "" {
+		formatter.buffer.WriteString("Bill ID: " + billData.Id + "\n")
+	}
+
+	formatter.buffer.WriteString("\n")
+
 	return formatter.buffer
 }

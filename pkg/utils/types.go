@@ -76,10 +76,12 @@ type ProductWithQuantityFromBill struct {
 // bills
 
 type BillData struct {
+	Id        string
 	Products  []ProductWithQuantityFromBill
 	Subtotal  float64
 	VATAmount float64
 	Total     float64
+	CreatedAt string
 }
 
 type BillProduct struct {
@@ -88,10 +90,11 @@ type BillProduct struct {
 }
 
 type Bill struct {
-	Id       string        `json:"id"`
-	Products []BillProduct `json:"products"` // not ok, bill product repo needs to be put in place
-	Subtotal float64       `json:"subtotal"`
-	Total    float64       `json:"total"`
+	Id        string        `json:"id"`
+	Products  []BillProduct `json:"products"` // not ok, bill product repo needs to be put in place
+	Subtotal  float64       `json:"subtotal"`
+	Total     float64       `json:"total"`
+	CreatedAt string        `json:"createdAt"`
 }
 
 type BillRepositoryInterface interface {
@@ -101,6 +104,8 @@ type BillRepositoryInterface interface {
 		products []BillProduct,
 		subtotal float64,
 		total float64,
+		createdAt string,
+		id string,
 	) *Bill
 }
 

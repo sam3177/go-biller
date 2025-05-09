@@ -47,7 +47,11 @@ func (formatter *BillEpsonPrinterFormatter) FormatBill(billData utils.BillData, 
 	formatter.buffer.Write([]byte{0x1B, 0x64, 0x04}) // Feed 4 lines
 	formatter.alignCenter()
 
-	formatter.AppendQRCodeToBuffer("https://www.instagram.com/silviu.rvn/") // come back here to put the bill id
+	if billData.Id != "" {
+		formatter.AppendQRCodeToBuffer(billData.Id)
+	}
+
+	formatter.buffer.WriteString(formatter.formatBillDate(rowLength, billData.CreatedAt))
 
 	formatter.buffer.Write([]byte{0x1B, 0x64, 0x06}) // Feed 6 lines
 	formatter.buffer.Write([]byte{0x1D, 0x56, 0x00}) // Cut the paper

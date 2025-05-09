@@ -134,7 +134,7 @@ type BillRepositoryMock struct {
 }
 
 // Mock method for AddBill
-func (m *BillRepositoryMock) AddBill(products []utils.BillProduct, subtotal float64, total float64) *utils.Bill {
+func (m *BillRepositoryMock) AddBill(products []utils.BillProduct, subtotal float64, total float64, createdAt string, id string) *utils.Bill {
 	args := m.Called(products, subtotal, total)
 	return args.Get(0).(*utils.Bill)
 }

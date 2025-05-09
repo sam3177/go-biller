@@ -41,11 +41,15 @@ func (repo *LocalBillRepository) AddBill(
 	products []utils.BillProduct,
 	subtotal float64,
 	total float64,
+	createdAt string,
+	id string,
 ) *utils.Bill {
 	newBill, error := repo.dataHandler.Add(utils.Bill{
-		Products: products,
-		Subtotal: subtotal,
-		Total:    total,
+		Products:  products,
+		Subtotal:  subtotal,
+		Total:     total,
+		CreatedAt: createdAt,
+		Id:        id,
 	})
 
 	if error != nil {
