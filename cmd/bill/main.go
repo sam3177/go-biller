@@ -15,46 +15,35 @@ import (
 	"biller/pkg/qrCodeGenerator"
 	"biller/pkg/utils"
 	"bufio"
+	"flag"
 	"fmt"
 	"os"
 )
 
 func GetProperPrinterAndFormatter() (utils.PrinterInterface, utils.BillFormatterInterface) {
-	args := os.Args[1:]
-	var printerType string
+	// Define command line flags
+	printerType := flag.String("printer", "terminalPrinter", "Type of printer to use (terminalPrinter or epsonPrinter)")
+	flag.Parse()
 
-	if len(args) == 0 {
-		printerType = "terminalPrinter"
-	} else {
-		printerType = args[0]
-	}
-
-	switch printerType {
-
-	// case EpsonPrinter:
+	switch *printerType {
 	case "epsonPrinter":
 		printer := printer.NewEpsonPrinter("EPSON_TM_T20III")
-
 		formatter := billFormatter.NewBillEpsonPrinterFormatter(
 			qrCodeGenerator.NewQRCodeGenerator(),
 		)
-
 		return printer, formatter
 
-	// case TerminalPrinter:
 	case "terminalPrinter":
 		printer := printer.NewTerminalPrinter(50)
 		formatter := billFormatter.NewBillTerminalFormatter()
-
 		return printer, formatter
 
 	default:
+		fmt.Printf("Warning: Unknown printer type '%s'. Using terminal printer as default.\n", *printerType)
 		printer := printer.NewTerminalPrinter(50)
 		formatter := billFormatter.NewBillTerminalFormatter()
-
 		return printer, formatter
 	}
-
 }
 
 func main() {
