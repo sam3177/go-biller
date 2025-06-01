@@ -22,11 +22,11 @@ run:
 
 run-terminal-printer:
 	@echo "Running $(APP_NAME) with terminal printer..."
-	go run $(CMD_DIR) terminalPrinter
+	go run $(CMD_DIR) -printer=terminalPrinter
 
 run-epson-printer:
 	@echo "Running $(APP_NAME) with EPSON printer..."
-	go run $(CMD_DIR) epsonPrinter
+	go run $(CMD_DIR) -printer=epsonPrinter
 
 clean:
 	@echo "Cleaning up..."
