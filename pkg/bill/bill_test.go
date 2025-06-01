@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 )
 
 var testTermimalPrinter = printer.NewTerminalPrinter(utils.BILL_ROW_LENGTH)
@@ -29,7 +30,8 @@ func findProductByID(products []utils.BillProduct, id string) *utils.BillProduct
 func TestAddProduct(t *testing.T) {
 	testProductsRepo := &mocks.ProductRepositoryMock{}
 	testBillRepo := &mocks.BillRepositoryMock{}
-	bill := NewBillingHandler(testProductsRepo, testBillRepo, testTermimalPrinter, testFormatter, "./bills")
+	testFileHandler := &mocks.FileHandlerMock{}
+	bill := NewBillingHandler(testProductsRepo, testBillRepo, testTermimalPrinter, testFormatter, testFileHandler)
 
 	tests := []struct {
 		name              string
@@ -182,7 +184,8 @@ func mockGetProductByIdForAddedProducts(bill *BillingHandler, testProductsRepo *
 func TestRemoveProduct(t *testing.T) {
 	testProductsRepo := &mocks.ProductRepositoryMock{}
 	testBillRepo := &mocks.BillRepositoryMock{}
-	bill := NewBillingHandler(testProductsRepo, testBillRepo, testTermimalPrinter, testFormatter, "./bills")
+	testFileHandler := &mocks.FileHandlerMock{}
+	bill := NewBillingHandler(testProductsRepo, testBillRepo, testTermimalPrinter, testFormatter, testFileHandler)
 
 	// Arrange: Add initial products to the bill
 	populateBillWithProducts(bill, testProductsRepo)
@@ -275,7 +278,8 @@ func TestRemoveProduct(t *testing.T) {
 func TestCalculateTotal(t *testing.T) {
 	testProductsRepo := &mocks.ProductRepositoryMock{}
 	testBillRepo := &mocks.BillRepositoryMock{}
-	bill := NewBillingHandler(testProductsRepo, testBillRepo, testTermimalPrinter, testFormatter, "./bills")
+	testFileHandler := &mocks.FileHandlerMock{}
+	bill := NewBillingHandler(testProductsRepo, testBillRepo, testTermimalPrinter, testFormatter, testFileHandler)
 
 	// Arrange: Add initial products to the bill
 	populateBillWithProducts(bill, testProductsRepo)
@@ -292,7 +296,8 @@ func TestCalculateTotal(t *testing.T) {
 func TestCalculateVAT(t *testing.T) {
 	testProductsRepo := &mocks.ProductRepositoryMock{}
 	testBillRepo := &mocks.BillRepositoryMock{}
-	bill := NewBillingHandler(testProductsRepo, testBillRepo, testTermimalPrinter, testFormatter, "./bills")
+	testFileHandler := &mocks.FileHandlerMock{}
+	bill := NewBillingHandler(testProductsRepo, testBillRepo, testTermimalPrinter, testFormatter, testFileHandler)
 
 	// Arrange: Add initial products to the bill
 	populateBillWithProducts(bill, testProductsRepo)
@@ -308,22 +313,18 @@ func TestCalculateVAT(t *testing.T) {
 func TestSaveBill(t *testing.T) {
 	testProductsRepo := &mocks.ProductRepositoryMock{}
 	testBillRepo := &mocks.BillRepositoryMock{}
-
-	bill := NewBillingHandler(testProductsRepo, testBillRepo, testTermimalPrinter, testFormatter, "./bills")
+	testFileHandler := &mocks.FileHandlerMock{}
+	bill := NewBillingHandler(testProductsRepo, testBillRepo, testTermimalPrinter, testFormatter, testFileHandler)
 
 	//make bills folder and cleanup at the end with defer
 	os.Mkdir("bills", 0755)
-	defer os.RemoveAll(bill.BillsDir)
+	defer os.RemoveAll("bills")
 
+	testFileHandler.On("Save", mock.Anything, mock.Anything).Return(mock.Anything).Once()
 	testBillRepo.On("AddBill", bill.products, bill.CalculateTotal(), bill.CalculateTotal()).Return(&utils.Bill{}).Once()
 
-	fileName := bill.SaveBill()
+	bill.SaveBill()
 
-	file, error := os.Open(bill.BillsDir + "/" + fileName)
-
-	if error != nil {
-		t.Errorf("file not found")
-	}
-
-	defer file.Close()
+	testFileHandler.AssertExpectations(t)
+	testBillRepo.AssertExpectations(t)
 }

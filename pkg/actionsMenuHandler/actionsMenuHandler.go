@@ -77,8 +77,7 @@ func (menuHandler *ActionsMenuHandler) executeAction(action string) {
 		menuHandler.billingHandler.PrintBill()
 
 	case utils.BILL_ACTIONS[utils.SaveAndExit]:
-		fileName := menuHandler.billingHandler.SaveBill()
-		utils.OpenFileInVsCode(menuHandler.billingHandler.BillsDir + "/" + fileName)
+		menuHandler.billingHandler.SaveBill()
 		os.Exit(0)
 
 	case utils.BILL_ACTIONS[utils.Exit]:

@@ -2,6 +2,7 @@ package mocks
 
 import (
 	"biller/pkg/utils"
+	"bytes"
 
 	"github.com/stretchr/testify/mock"
 )
@@ -173,4 +174,17 @@ func (m *BillsJSONStorageHandlerMock) Add(newBill utils.Bill) (*utils.Bill, erro
 	args := m.Called(newBill)
 
 	return args.Get(0).(*utils.Bill), args.Error(1)
+}
+
+// file handler
+type FileHandlerMock struct {
+	mock.Mock
+}
+
+func (m *FileHandlerMock) Save(data *bytes.Buffer, fileName string) string {
+	args := m.Called(data, fileName)
+	return args.String(0)
+}
+
+func (m *FileHandlerMock) OpenFile(filePath string, command string) {
 }

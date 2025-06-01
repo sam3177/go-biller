@@ -3,7 +3,6 @@ package bill
 import (
 	"bytes"
 	"fmt"
-	"os"
 	"time"
 
 	"github.com/google/uuid"
@@ -17,7 +16,7 @@ type BillingHandler struct {
 	BillRepo    utils.BillRepositoryInterface
 	Printer     utils.PrinterInterface
 	Formatter   utils.BillFormatterInterface
-	BillsDir    string
+	FileHandler utils.FileHandlerInterface
 }
 
 func NewBillingHandler(
@@ -25,7 +24,7 @@ func NewBillingHandler(
 	billRepo utils.BillRepositoryInterface,
 	printer utils.PrinterInterface,
 	formatter utils.BillFormatterInterface,
-	billsDir string,
+	fileHandler utils.FileHandlerInterface,
 ) *BillingHandler {
 	return &BillingHandler{
 		products:    []utils.BillProduct{},
@@ -33,7 +32,7 @@ func NewBillingHandler(
 		BillRepo:    billRepo,
 		Formatter:   formatter,
 		Printer:     printer,
-		BillsDir:    billsDir,
+		FileHandler: fileHandler,
 	}
 }
 
@@ -184,9 +183,7 @@ func (billingHandler *BillingHandler) SaveBill() string {
 	createdAt := time.Now().Format("02-01-2006 15:04:05")
 	data := billingHandler.FormatBill(uuid, createdAt)
 
-	fileName := "bill_" + uuid + ".txt"
-
-	error := os.WriteFile(billingHandler.BillsDir+"/"+fileName, utils.CleanBufferBeforeCreatingTheFile(data).Bytes(), 0644)
+	billingHandler.Printer.Print(*data)
 
 	billingHandler.BillRepo.AddBill(
 		billingHandler.products,
@@ -196,9 +193,9 @@ func (billingHandler *BillingHandler) SaveBill() string {
 		uuid,
 	)
 
-	if error != nil {
-		fmt.Println("Error", error)
-	}
+	fileName := "bill_" + uuid + ".txt"
+
+	billingHandler.FileHandler.Save(data, fileName)
 
 	return fileName
 }

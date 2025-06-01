@@ -151,3 +151,9 @@ type BillStorageHandlerInterface interface {
 type BarcodeGeneratorInterface interface {
 	GenerateCode(data string, width int, height int) (image.Image, error)
 }
+
+// File Handler
+type FileHandlerInterface interface {
+	Save(data *bytes.Buffer, fileName string) string
+	OpenFile(filePath string, command string)
+}
