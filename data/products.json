@@ -4,7 +4,7 @@
     "name": "Banana",
     "unitPrice": 1,
     "unitType": "kg",
-    "stock": 1111107,
+    "stock": 1111106,
     "vatCategory": "A"
   },
   {
@@ -12,7 +12,7 @@
     "name": "Apple",
     "unitPrice": 2,
     "unitType": "kg",
-    "stock": 211105.9,
+    "stock": 211104.9,
     "vatCategory": "A"
   },
   {
@@ -20,7 +20,7 @@
     "name": "Orange",
     "unitPrice": 3,
     "unitType": "kg",
-    "stock": 111111,
+    "stock": 111109,
     "vatCategory": "A"
   },
   {
@@ -36,7 +36,7 @@
     "name": "Toilet Paper",
     "unitPrice": 0.1,
     "unitType": "piece",
-    "stock": 1311067,
+    "stock": 1311045,
     "vatCategory": "B"
   }
 ]

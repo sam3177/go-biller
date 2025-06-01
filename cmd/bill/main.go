@@ -6,6 +6,7 @@ import (
 	"biller/pkg/billFormatter"
 	"biller/pkg/billRepository"
 	"biller/pkg/billsJsonStorageHandler"
+	"biller/pkg/fileHandler"
 	"biller/pkg/inputHandler"
 	"biller/pkg/inputReader"
 	"biller/pkg/inputValidator"
@@ -60,13 +61,14 @@ func main() {
 
 	productRepo := productRepository.NewLocalProductRepository(productsJSONHandler)
 	billRepo := billRepository.NewLocalBillRepository(billsJSONHandler)
+	fileHandler := fileHandler.NewFileHandler(utils.GetAbsolutePath("./bills"))
 
 	bill := bill.NewBillingHandler(
 		productRepo,
 		billRepo,
 		printer,
 		formatter,
-		utils.GetAbsolutePath("./bills"),
+		fileHandler,
 	)
 
 	inputValidator := inputValidator.NewInputValidator()
